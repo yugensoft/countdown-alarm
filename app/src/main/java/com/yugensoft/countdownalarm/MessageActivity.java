@@ -6,23 +6,54 @@ import android.graphics.Color;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Interval;
+
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class MessageActivity extends AppCompatActivity {
 
     private static final int MY_DATA_CHECK_CODE = 0;
     public TextToSpeech tts;
+
+    private static final String TAG = "message-activity";
+
+    //todo
+    private TextWatcher messageTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
 
     // setup TTS
     public void onInit(int initStatus) {
@@ -43,9 +74,18 @@ public class MessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_message);
 
         EditText message = (EditText) findViewById(R.id.edit_message);
+        message.addTextChangedListener(messageTextWatcher);
 
-        // a tag-like span
-//        text.setSpan(new RoundedBackgroundSpan(Color.RED, Color.GREEN), 6, 11, 0);
+        // default message
+        SpannableString msg1 = new SpannableString("Time to wake up! Today is ");
+        SpannableString msg2 = new SpannableString(" and the date is ");
+        DateTime now = DateTime.now();
+        SpannableString msgDay = new SpannableString(now.dayOfWeek().getAsText(Locale.getDefault()));
+        msgDay.setSpan(new RoundedBackgroundSpan(Color.RED, Color.GREEN), 0, msgDay.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpannableString msgDate = new SpannableString(now.toString("dd-MM-YY"));
+        msgDate.setSpan(new RoundedBackgroundSpan(Color.BLUE, Color.WHITE), 0, msgDate.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        message.setText(TextUtils.concat(msg1,msgDay,msg2,msgDate));
 
         // check for TTS data
         Intent checkTTSIntent = new Intent();
@@ -85,6 +125,15 @@ public class MessageActivity extends AppCompatActivity {
 
     public void previewMessage(View view) {
         EditText message = (EditText) findViewById(R.id.edit_message);
+
+        // detect any tags
+        Editable text = message.getText();
+        RoundedBackgroundSpan[] spans = text.getSpans(0,message.length(),RoundedBackgroundSpan.class);
+        for (RoundedBackgroundSpan span : spans){
+            int spanEnd = text.getSpanEnd(span);
+            int spanStart = text.getSpanStart(span);
+            Log.d(TAG, "span:"+span.getDrawnText()+ "," + String.valueOf(spanStart) + "," + String.valueOf(spanEnd));
+        }
 
         tts.speak(message.getText().toString(),TextToSpeech.QUEUE_FLUSH,null);
     }

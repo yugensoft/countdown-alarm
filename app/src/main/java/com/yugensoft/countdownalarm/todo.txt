@@ -1,3 +1,4 @@
 TODO:
+implement tagging and all MVP tags
 
 the TTS engine needs to be checked for an installed before the app can be used.
