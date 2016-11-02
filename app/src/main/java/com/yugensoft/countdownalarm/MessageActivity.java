@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -86,6 +87,8 @@ public class MessageActivity extends AppCompatActivity {
         msgDate.setSpan(new RoundedBackgroundSpan(Color.BLUE, Color.WHITE), 0, msgDate.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         message.setText(TextUtils.concat(msg1,msgDay,msg2,msgDate));
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
 
         // check for TTS data
         Intent checkTTSIntent = new Intent();
