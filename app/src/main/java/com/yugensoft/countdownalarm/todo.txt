@@ -1,4 +1,14 @@
 TODO:
-implement tagging and all MVP tags
+Message:
+finish countup/down tags
+add tag deletion
+make layout and buttons look decent
 
+Alarm:
+start
+
+-- revisit --
 the TTS engine needs to be checked for an installed before the app can be used.
+
+-- before publish --
+add all tracking

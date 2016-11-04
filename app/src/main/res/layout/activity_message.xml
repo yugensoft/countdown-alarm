@@ -9,24 +9,93 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yugensoft.countdownalarm.MessageActivity">
 
+    <LinearLayout
+        android:id="@+id/ll_buttonbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        style="?android:attr/buttonBarStyle"
+        >
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:id="@+id/button_cancel"
+            android:onClick="cancelMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            android:id="@+id/button_save"
+            android:onClick="saveMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+    </LinearLayout>
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/edit_message"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_below="@+id/ll_buttonbar"
         android:inputType="textVisiblePassword|textMultiLine"
-
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Preview"
+        android:text="@string/preview"
         android:id="@+id/button_preview"
         android:onClick="previewMessage"
         android:layout_below="@+id/edit_message"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/insert_tags"
+        android:id="@+id/text_insert_tags"
+        android:layout_below="@+id/edit_message"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/todays_date"
+        android:id="@+id/button_tag_date"
+        android:layout_below="@+id/text_insert_tags"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:onClick="insertTagDate"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Countdown"
+        android:id="@+id/button_tag_countdown"
+        android:layout_below="@+id/button_tag_date"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Countup"
+        android:id="@+id/button_tag_countup"
+        android:layout_below="@+id/button_tag_countdown"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
 </RelativeLayout>

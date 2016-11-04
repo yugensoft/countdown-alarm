@@ -6,19 +6,21 @@ import android.graphics.RectF;
 import android.text.style.ReplacementSpan;
 
 /**
- * Created by yugensoft on 28/10/2016.
+ * Special TagSpan, based off RoundedRectangleSpan, which stores associated Tag
  */
-public class RoundedBackgroundSpan extends ReplacementSpan {
+public class TagSpan extends ReplacementSpan {
     private final int mPadding = 15;
     private int mBackgroundColor;
     private int mTextColor;
+    private Tag mTag;
 
     private String mDrawnText;
 
-    public RoundedBackgroundSpan(int backgroundColor, int textColor) {
+    public TagSpan(int backgroundColor, int textColor, Tag tag) {
         super();
         mBackgroundColor = backgroundColor;
         mTextColor = textColor;
+        mTag = tag;
     }
 
     @Override
@@ -46,4 +48,7 @@ public class RoundedBackgroundSpan extends ReplacementSpan {
     }
 
 
+    public Tag getTag() {
+        return mTag;
+    }
 }
