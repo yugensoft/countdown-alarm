@@ -20,9 +20,6 @@ public class Message {
     @ToMany (referencedJoinProperty = "messageId")
     private List<Tag> tags;
 
-
-    // Generated area -----------------
-
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;

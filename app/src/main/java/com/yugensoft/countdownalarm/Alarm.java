@@ -1,14 +1,36 @@
 package com.yugensoft.countdownalarm;
 
+import android.content.Context;
+import android.util.Log;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.DaoException;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.quartz.CronExpression;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 @Entity
 public class Alarm {
+    private static final int CRON_EXPRESSION_SECONDS = 0;
+    private static final int CRON_EXPRESSION_MINUTES = 1;
+    private static final int CRON_EXPRESSION_HOURS = 2;
+    private static final int CRON_EXPRESSION_DAYS_OF_MONTH = 3;
+    private static final int CRON_EXPRESSION_MONTHS = 4;
+    private static final int CRON_EXPRESSION_DAYS_OF_WEEK = 5;
+    private static final int CRON_EXPRESSION_YEARS = 6;
+
     // Schema area
     @Id(autoincrement = true)
     private Long id;
@@ -16,20 +38,137 @@ public class Alarm {
     @NotNull
     private String schedule; // cron schedule string
     // nullable
-    private int repeats; // how many more times to trigger this alarm before de-activating it; forever if null
+    private Integer repeats; // how many more times to trigger this alarm before de-activating it; forever if null
     @NotNull
     private boolean active; // whether alarm is active or not
-    // todo: ringtone type?
+    private String ringtone; // the ringtone (uri string)
     @NotNull
     private boolean vibrate; // vibrate on/off
     private String label; // user-set name of the alarm
-    @ToOne @NotNull
+    @ToOne //todo: why cant this be notnull
     private Message message;
 
+    /**
+     * Function to set a standard "hh:mm" + Mon,Tue...Sun repeating alarm / no-repeat
+     * Takes first three characters of each element in repeatDays to give the day
+     * @param hour Alarm hour
+     * @param minute Alarm minute
+     * @param repeatDays A set of title-case days
+     */
+    public void setSchedule(int hour, int minute, Set<String> repeatDays){
+        StringBuilder daysOfWeekExpr = new StringBuilder();
+        String delim = "";
+        if(repeatDays.size() == 0){
+            // non-repeated alarm
+            repeats = 1;
+            daysOfWeekExpr.append("*");
+        } else {
+            // repeat on the given days
+            repeats = null;
+            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEE", Locale.getDefault());
 
+            for (String sLong : repeatDays){
+                try {
+                    String sShort = sdfShort.format(sdfLong.parse(sLong));
+                    daysOfWeekExpr.append(delim).append(sShort);
+                } catch (ParseException e){
+                    throw new RuntimeException("Error parsing cron-style days-of-week to long-style");
+                }
+                delim = ",";
+            }
+        }
 
-    
-    // Generated area -----------------
+        // Quartz scheduler format: s m H DoM M DoW y
+        String cronStr = String.format("0 %s %s ? * %s *", minute, hour, daysOfWeekExpr.toString());
+
+        schedule = cronStr;
+    }
+
+    /**
+     * @return The schedule in a human-readable string
+     */
+    public WeeklyRepeatDaysType getScheduleRepeatDays(){
+        String[] cronParts = schedule.split("\\s+");
+        if(cronParts.length != 7){
+            throw new RuntimeException("Attempt to render from malformed schedule string: " + schedule);
+        }
+
+        String daysOfWeek = cronParts[CRON_EXPRESSION_DAYS_OF_WEEK];
+        if(repeats == null && !daysOfWeek.equals("*")) { // a ever-repeating days-list schedule
+            StringBuilder outputHumanReadable = new StringBuilder("Every ");
+            Set<String> outputFullWords = new HashSet<String>();
+
+            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEE", Locale.getDefault());
+
+            String token = "";
+            String[] daysList = daysOfWeek.split(",");
+
+            // Check integrity
+            if(daysList.length == 0 || daysList.length > 7){
+                throw new RuntimeException("Corrupted list of days: " + daysOfWeek);
+            }
+
+            try {
+                if(daysList.length == 1) {
+                    // Use full day name if only one day
+                    outputHumanReadable.append(sdfLong.format(sdfShort.parse(daysList[0])));
+                } else {
+                    // Use short day names
+                    for (String day : daysList) {
+                        outputHumanReadable.append(token).append(day);
+                        outputFullWords.add(sdfLong.format(sdfShort.parse(day)));
+
+                        token = ", ";
+                    }
+                }
+            } catch (ParseException e){
+                throw new RuntimeException("Error parsing cron-style days-of-week to long-style");
+            }
+
+            return new WeeklyRepeatDaysType(outputFullWords,outputHumanReadable.toString());
+
+        } else if(repeats <= 1 && daysOfWeek.equals("*")){ // a single-repeating alarm
+                return new WeeklyRepeatDaysType(new HashSet<String>(),"Never");
+        } else {
+            throw new RuntimeException("Unexpected alarm schedule/repeats: " + String.valueOf(schedule) + " / " + String.valueOf(repeats));
+        }
+    }
+
+    /**
+     * @return The alarm time in human-readable format
+     */
+    public AlarmTimeType getScheduleAlarmTime(Context context){
+        String[] cronParts = schedule.split("\\s+");
+        if(cronParts.length != 7){
+            throw new RuntimeException("Attempt to get time from malformed schedule string: "+schedule);
+        }
+
+        int hour = Integer.valueOf(cronParts[CRON_EXPRESSION_HOURS]);
+        int minute = Integer.valueOf(cronParts[CRON_EXPRESSION_MINUTES]);
+        DateTime dateTime = new DateTime(2000,1,1,hour,minute);
+        DateTimeFormatter fmt;
+        if (android.text.format.DateFormat.is24HourFormat(context)) {
+            fmt = DateTimeFormat.forPattern("HH:mm");
+        } else {
+            fmt = DateTimeFormat.forPattern("hh:mm a");
+        }
+        return new AlarmTimeType(hour, minute, fmt.print(dateTime));
+    }
+
+    /**
+     * @return The next Alarm time
+     */
+    public Date getNextAlarmTime(){
+        try {
+            CronExpression cronExpression = new CronExpression(schedule);
+            Date now = new Date();
+            return cronExpression.getNextValidTimeAfter(now);
+        } catch (ParseException e){
+            throw new RuntimeException("Attempt to get Next Alarm Time from invalid schedule: "+schedule);
+        }
+    }
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
@@ -38,39 +177,29 @@ public class Alarm {
     /** Used for active entity operations. */
     @Generated(hash = 1493767907)
     private transient AlarmDao myDao;
-
-    @Generated(hash = 1103821362)
-    private transient boolean message__refreshed;
-
-
-    // Generated & setter-getter area
-
-    @Generated(hash = 2065598881)
-    public Alarm(Long id, @NotNull String schedule, int repeats, boolean active, boolean vibrate, String label) {
+    @Generated(hash = 1769228008)
+    public Alarm(Long id, @NotNull String schedule, Integer repeats, boolean active, String ringtone,
+            boolean vibrate, String label) {
         this.id = id;
         this.schedule = schedule;
         this.repeats = repeats;
         this.active = active;
+        this.ringtone = ringtone;
         this.vibrate = vibrate;
         this.label = label;
     }
-
     @Generated(hash = 1972324134)
     public Alarm() {
     }
-
     public Long getId() {
         return this.id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
-
     public String getSchedule() {
         return this.schedule;
     }
-
     public void setSchedule(String schedule) {
         this.schedule = schedule;
     }
@@ -78,27 +207,23 @@ public class Alarm {
     public boolean getActive() {
         return this.active;
     }
-
     public void setActive(boolean active) {
         this.active = active;
     }
-
     public boolean getVibrate() {
         return this.vibrate;
     }
-
     public void setVibrate(boolean vibrate) {
         this.vibrate = vibrate;
     }
-
     public String getLabel() {
         return this.label;
     }
-
     public void setLabel(String label) {
         this.label = label;
     }
-
+    @Generated(hash = 1103821362)
+    private transient boolean message__refreshed;
     /** To-one relationship, resolved on first access. */
     @Generated(hash = 955954570)
     public Message getMessage() {
@@ -112,26 +237,19 @@ public class Alarm {
         }
         return message;
     }
-
     /** To-one relationship, returned entity is not refreshed and may carry only the PK property. */
     @Generated(hash = 93566467)
     public Message peakMessage() {
         return message;
     }
-
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 1971499210)
-    public void setMessage(@NotNull Message message) {
-        if (message == null) {
-            throw new DaoException(
-                    "To-one property 'message' has not-null constraint; cannot set to-one to null");
-        }
+    @Generated(hash = 840221457)
+    public void setMessage(Message message) {
         synchronized (this) {
             this.message = message;
             message__refreshed = true;
         }
     }
-
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
      * Entity must attached to an entity context.
@@ -143,7 +261,6 @@ public class Alarm {
         }
         myDao.delete(this);
     }
-
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
      * Entity must attached to an entity context.
@@ -155,7 +272,6 @@ public class Alarm {
         }
         myDao.refresh(this);
     }
-
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
      * Entity must attached to an entity context.
@@ -167,13 +283,17 @@ public class Alarm {
         }
         myDao.update(this);
     }
-
-    public int getRepeats() {
-        return this.repeats;
+    public String getRingtone() {
+        return this.ringtone;
     }
-
-    public void setRepeats(int repeats) {
+    public void setRingtone(String ringtone) {
+        this.ringtone = ringtone;
+    }
+    public void setRepeats(Integer repeats) {
         this.repeats = repeats;
+    }
+    public Integer getRepeats() {
+        return this.repeats;
     }
 
     /** called by internal mechanisms, do not call yourself. */

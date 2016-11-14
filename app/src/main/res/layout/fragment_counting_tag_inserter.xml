@@ -6,48 +6,67 @@
     android:layout_height="match_parent"
     >
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/label_compare_date"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/none"
+            android:textColor="@color/blue"
+            android:id="@+id/text_compare_date"
+            />
+
+
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/speech_format"
+        android:visibility="gone"
         />
+
     <RadioGroup
         android:id="@+id/rg_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
 
         >
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
-            android:tag="EEEE"
-            android:id="@+id/rb_5" />
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:tag="dddd 'of' MMMM"
+            android:tag="dd"
             android:id="@+id/rb_1" />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
-            android:tag="MMMM 'the' dddd"
+            android:tag="ww dd"
             android:id="@+id/rb_2" />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
-            android:tag="dddd 'of' MMMM YYYY"
+            android:tag="MM dd"
             android:id="@+id/rb_3" />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
-            android:tag="MMMM 'the' dddd YYYY"
+            android:tag="MM ww dd"
             android:id="@+id/rb_4" />
-
 
     </RadioGroup>
 

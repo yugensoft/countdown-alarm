@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <MultiSelectListPreference
+        android:key="repeat"
+        android:title="Repeat"
+        android:summary=""
+        android:entries="@array/pref_schedule"
+        android:entryValues="@array/pref_schedule"
+        android:dialogTitle="Alarm schedule"
+        android:persistent="false"
+        />
+    <com.yugensoft.countdownalarm.ExtRingtonePreference
+        android:key="ringtone"
+        android:title="Ringtone"
+        android:summary=""
+        android:persistent="false"
+        />
+    <CheckBoxPreference
+        android:key="vibrate"
+        android:title="Vibrate"
+        android:summary=""
+        android:defaultValue="true"
+        android:persistent="false"
+        />
+    <EditTextPreference
+        android:key="label"
+        android:title="Label"
+        android:summary=""
+        android:dialogTitle="Alarm label"
+        android:persistent="false"
+        />
+
+
+</PreferenceScreen>

@@ -6,4 +6,31 @@
     <string name="preview">Preview</string>
     <string name="insert_tags">Insert Tags:</string>
     <string name="todays_date">Today\'s Date</string>
+    <string name="insert_tag_title">Insert Tag</string>
+    <string name="speech_format">Speech format:</string>
+    <string name="none">(none)</string>
+    <string name="count_up_to">Count up to:</string>
+    <string name="count_down_to">Count down to:</string>
+    <string name="button_tag_countdown">Countdown</string>
+    <string name="button_tag_countup">Countup</string>
+    <string name="menu">menu</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <string-array name="pref_schedule">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="alarm_activity_title">Set alarm</string>
 </resources>

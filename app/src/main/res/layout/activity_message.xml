@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:text="@string/cancel"
             android:id="@+id/button_cancel"
-            android:onClick="cancelMessage"
+            android:onClick="cancelAlarm"
             style="?android:attr/buttonBarButtonStyle"
             />
 
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:text="@string/save"
             android:id="@+id/button_save"
-            android:onClick="saveMessage"
+            android:onClick="saveAlarm"
             style="?android:attr/buttonBarButtonStyle"
             />
     </LinearLayout>
@@ -57,45 +57,48 @@
         android:layout_alignParentEnd="true" />
 
 
-
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/insert_tags"
-        android:id="@+id/text_insert_tags"
         android:layout_below="@+id/edit_message"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/todays_date"
-        android:id="@+id/button_tag_date"
-        android:layout_below="@+id/text_insert_tags"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:onClick="insertTagDate"
-        />
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/insert_tags"
+            android:id="@+id/text_insert_tags"
+            />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Countdown"
-        android:id="@+id/button_tag_countdown"
-        android:layout_below="@+id/button_tag_date"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/todays_date"
+            android:id="@+id/button_tag_date"
+            android:onClick="insertTagDate"
+            />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Countup"
-        android:id="@+id/button_tag_countup"
-        android:layout_below="@+id/button_tag_countdown"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/button_tag_countdown"
+            android:id="@+id/button_tag_countdown"
+            android:onClick="insertTagCountdown"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/button_tag_countup"
+            android:id="@+id/button_tag_countup"
+            android:onClick="insertTagCountup"
+            />
+
+
+    </LinearLayout>
+
 
 
 </RelativeLayout>

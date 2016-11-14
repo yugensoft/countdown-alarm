@@ -11,6 +11,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -18,24 +19,31 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+
     compile 'joda-time:joda-time:2.9.4'
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'org.greenrobot:greendao:3.2.0'
-    compile 'com.google.android.gms:play-services-ads:9.2.0'
-    compile 'com.google.android.gms:play-services-identity:9.2.0'
-    compile 'com.google.android.gms:play-services-gcm:9.2.0'
-    compile 'com.google.android.gms:play-services-analytics:9.2.0'
-    compile 'com.google.android.gms:play-services-appindexing:9.2.0'
+    compile 'com.google.android.gms:play-services-ads:9.4.0'
+    compile 'com.google.android.gms:play-services-identity:9.4.0'
+    compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    compile 'com.google.android.gms:play-services-analytics:9.4.0'
+    compile 'com.google.android.gms:play-services-appindexing:9.4.0'
+    compile 'com.jakewharton:butterknife:8.4.0'
+    compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:support-vector-drawable:24.2.0'
+    compile 'org.apache.commons:commons-lang3:3.5'
+    compile 'org.quartz-scheduler:quartz:2.2.1'
+
+    testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
 
-
 // greendao related
 greendao {
-    schemaVersion 1
+    schemaVersion 4
 }

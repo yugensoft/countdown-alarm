@@ -1,9 +1,14 @@
 package com.yugensoft.countdownalarm;
 
+import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.support.v4.content.ContextCompat;
 import android.text.style.ReplacementSpan;
+
+import static android.R.attr.textColor;
 
 /**
  * Special TagSpan, based off RoundedRectangleSpan, which stores associated Tag
@@ -16,10 +21,30 @@ public class TagSpan extends ReplacementSpan {
 
     private String mDrawnText;
 
-    public TagSpan(int backgroundColor, int textColor, Tag tag) {
+    public TagSpan(Tag tag, Context context) {
         super();
-        mBackgroundColor = backgroundColor;
-        mTextColor = textColor;
+
+        // set colors according to tag type
+        switch(tag.getTagType()){
+            case UNKNOWN:
+                mBackgroundColor = Color.BLACK;
+                mTextColor = Color.WHITE;
+                break;
+            case COUNTDOWN:
+                mBackgroundColor = ContextCompat.getColor(context, R.color.countdown_tag_background_color);
+                mTextColor = ContextCompat.getColor(context, R.color.countdown_tag_foreground_color);
+                break;
+            case COUNTUP:
+                mBackgroundColor = ContextCompat.getColor(context, R.color.countup_tag_background_color);
+                mTextColor = ContextCompat.getColor(context, R.color.countup_tag_foreground_color);
+                break;
+            case TODAYS_DATE:
+                mBackgroundColor = ContextCompat.getColor(context, R.color.date_tag_background_color);
+                mTextColor = ContextCompat.getColor(context, R.color.date_tag_foreground_color);
+                break;
+            default:
+                throw new RuntimeException();
+        }
         mTag = tag;
     }
 

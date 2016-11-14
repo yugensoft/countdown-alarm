@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -87,25 +88,12 @@ public class MessageActivity extends AppCompatActivity {
         DaoSession daoSession = ((CountdownAlarmApplication)getApplication()).getDaoSession();
         MessageDao messageDao = daoSession.getMessageDao();
 
-        if(messageDao.count()==0) {
-            // default message
-//            SpannableString msg1 = new SpannableString("Time to wake up! Today is ");
-//            SpannableString msg2 = new SpannableString(" and the date is ");
-//            DateTime now = DateTime.now();
-//            SpannableString msgDay = new SpannableString(now.dayOfWeek().getAsText(Locale.getDefault()));
-//            msgDay.setSpan(new TagSpan(Color.RED, Color.GREEN, 1), 0, msgDay.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//            SpannableString msgDate = new SpannableString(now.toString("dd-MM-YY"));
-//            msgDate.setSpan(new TagSpan(Color.BLUE, Color.WHITE, 2), 0, msgDate.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//            editMessage.setText(TextUtils.concat(msg1, msgDay, msg2, msgDate));
-
-            editMessage.setText("Test message.");
-        } else {
+        if(messageDao.count()>0) { // todo select off alarm
             List<Message> messages = messageDao.queryBuilder()
                     .where(MessageDao.Properties.Id.eq(1))
                     .list();
             Message message = messages.get(0);
-            SpannableStringBuilder messageText = renderTaggedText(message.getText(),daoSession.getTagDao());
+            SpannableStringBuilder messageText = renderTaggedText(message.getText(), daoSession.getTagDao());
 
             editMessage.setText(messageText);
         }
@@ -143,13 +131,13 @@ public class MessageActivity extends AppCompatActivity {
                 tag = tagList.get(0);
             }
             // render it as the replacement text
-            spanText = TagInserterFragment.renderTag(tag.getTagType(),tag.getSpeechFormat());
+            spanText = TagInserterFragment.renderTag(tag.getTagType(),tag.getSpeechFormat(),tag.getCompareDate(),null);
 
             matcher.appendReplacement(sb, spanText);
             spannable.append(sb.toString());
             int start = spannable.length() - spanText.length();
 
-            spannable.setSpan(new TagSpan(Color.RED, Color.GREEN, tag), start, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new TagSpan(tag, this), start, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         sb.setLength(0);
         matcher.appendTail(sb);
@@ -209,8 +197,11 @@ public class MessageActivity extends AppCompatActivity {
         TagSpan[] tagSpans = sMessage.getSpans(0,sMessage.length(),TagSpan.class);
 
         int previousEnd = 0;
+        ArrayList<Long> listOfUsedIds = new ArrayList<>(); // for use in where string, all other tags should be discarded
         for (TagSpan ts : tagSpans){
             Tag t = ts.getTag();
+            listOfUsedIds.add(t.getId());
+
             int start = sMessage.getSpanStart(ts);
             int end = sMessage.getSpanEnd(ts);
             // get previous un-spanned text
@@ -221,12 +212,23 @@ public class MessageActivity extends AppCompatActivity {
         }
         outputMessageText += sMessage.subSequence(previousEnd,sMessage.length());
 
-        // replace in db
-        DaoSession daoSession = ((CountdownAlarmApplication)getApplication()).getDaoSession();
+        // replace in db, or delete if made blank
+        DaoSession daoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
         MessageDao messageDao = daoSession.getMessageDao();
-        Message message = new Message(1L,outputMessageText);
-        messageDao.insertOrReplace(message);
+        if(outputMessageText.trim().length() == 0) {
+            // todo: delete the message
+        } else {
+            Message message = new Message(1L, outputMessageText);
+            messageDao.insertOrReplace(message);
 
+            // remove unused tags from db
+            TagDao tagDao = daoSession.getTagDao();
+            tagDao.queryBuilder()
+                    .where(TagDao.Properties.Id.notIn(listOfUsedIds))
+                    .where(TagDao.Properties.MessageId.eq(message.getId()))
+                    .buildDelete()
+                    .executeDeleteWithoutDetachingEntities();
+        }
 
         finish();
     }
@@ -234,5 +236,17 @@ public class MessageActivity extends AppCompatActivity {
     public void insertTagDate(View view) {
         int cursorPos = editMessage.getSelectionStart();
         DateTagInserterFragment.newInstance(cursorPos,1L).show(getSupportFragmentManager(),"date-tag-inserter");
+    }
+
+    public void insertTagCountdown(View view) {
+        int cursorPos = editMessage.getSelectionStart();
+        CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.DOWN)
+                .show(getSupportFragmentManager(),"countdown-tag-inserter");
+    }
+
+    public void insertTagCountup(View view) {
+        int cursorPos = editMessage.getSelectionStart();
+        CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.UP)
+                .show(getSupportFragmentManager(),"countup-tag-inserter");
     }
 }

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:descendantFocusability="blocksDescendants"
+    >
+
+    <CheckBox
+        android:text=""
+        android:layout_width="0dp"
+        android:layout_weight="0.1"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkbox_active" />
+
+    <LinearLayout
+        android:id="@+id/ll_alarm_schedule"
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_alarm_time"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_alarm_schedule"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_alarm_label"
+        android:layout_width="0dp"
+        android:layout_weight="0.2"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_alarm_label"
+            />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_message"
+            android:visibility="invisible"
+            android:id="@+id/iv_message"
+            />
+    </LinearLayout>
+
+
+    <ImageButton
+        android:layout_width="0dp"
+        android:layout_weight="0.1"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/menu"
+        android:src="@drawable/ic_action_menu"
+        android:layout_gravity="end"
+        android:id="@+id/ib_menu"
+        />
+
+</LinearLayout>
