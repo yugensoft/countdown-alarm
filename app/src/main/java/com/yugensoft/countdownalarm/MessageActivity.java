@@ -1,8 +1,9 @@
 package com.yugensoft.countdownalarm;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,25 +30,32 @@ public class MessageActivity extends AppCompatActivity {
 
     private static final String TAG = "message-activity";
 
+    public static final String KEY_MESSAGE_ID = "message-id";
+    public static final String KEY_MAKE_NEW_MESSAGE = "make-message";
+    public static final int RES_CANCELED = 0;
+    public static final int RES_SAVED = 1;
+    public static final String RES_MESSAGE_TEXT = "message-text";
+    public static final String RES_MESSAGE_ID = "message-id";
+
     private EditText editMessage;
 
-    //todo
-    private TextWatcher messageTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    private Long mMessageId;
 
+    /**
+     * Get a new intent for starting this activity
+     * @param context
+     * @param messageId
+     * @return
+     */
+    public static Intent newIntent(Context context, @Nullable Long messageId){
+        Intent intent = new Intent(context, MessageActivity.class);
+        if(messageId == null){
+            intent.putExtra(KEY_MAKE_NEW_MESSAGE,true);
+        } else {
+            intent.putExtra(KEY_MESSAGE_ID, messageId);
         }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    };
+        return intent;
+    }
 
     // setup TTS
     public void onInit(int initStatus) {
@@ -62,6 +70,17 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
 
+    private TextWatcher messageTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    };
     private InputFilter filter = new InputFilter() {
 
         @Override
@@ -80,23 +99,34 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
+        // Set up the message edittext
         editMessage = (EditText) findViewById(R.id.edit_message);
         editMessage.addTextChangedListener(messageTextWatcher);
         editMessage.setFilters(new InputFilter[] {filter});
 
-        // get message 1 from db if exist, and load
+        // get message from db
+        Message message;
         DaoSession daoSession = ((CountdownAlarmApplication)getApplication()).getDaoSession();
         MessageDao messageDao = daoSession.getMessageDao();
-
-        if(messageDao.count()>0) { // todo select off alarm
+        String taggedText;
+        if(getIntent().getExtras().getBoolean(KEY_MAKE_NEW_MESSAGE)){
+            taggedText = getString(R.string.default_message);
+            mMessageId = null;
+        } else {
+            mMessageId = getIntent().getExtras().getLong(KEY_MESSAGE_ID);
             List<Message> messages = messageDao.queryBuilder()
-                    .where(MessageDao.Properties.Id.eq(1))
+                    .where(MessageDao.Properties.Id.eq(mMessageId))
                     .list();
-            Message message = messages.get(0);
-            SpannableStringBuilder messageText = renderTaggedText(message.getText(), daoSession.getTagDao());
-
-            editMessage.setText(messageText);
+            if(messages.size() != 1){
+                throw new RuntimeException("Invalid ID passed or more than one message with that ID");
+            }
+            message = messages.get(0);
+            taggedText = message.getText();
         }
+
+        // populate edittext with message
+        SpannableStringBuilder messageText = renderTaggedText(taggedText, daoSession.getTagDao(), this);
+        editMessage.setText(messageText);
 
         // check for TTS data
         Intent checkTTSIntent = new Intent();
@@ -106,7 +136,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    public SpannableStringBuilder renderTaggedText(String text, TagDao tagDao) {
+    public static SpannableStringBuilder renderTaggedText(String text, TagDao tagDao, Context context) {
         StringBuffer sb = new StringBuffer();
         SpannableStringBuilder spannable = new SpannableStringBuilder();
         String regex = "\\{.*?\\}";
@@ -137,7 +167,7 @@ public class MessageActivity extends AppCompatActivity {
             spannable.append(sb.toString());
             int start = spannable.length() - spanText.length();
 
-            spannable.setSpan(new TagSpan(tag, this), start, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new TagSpan(tag, context), start, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         sb.setLength(0);
         matcher.appendTail(sb);
@@ -187,10 +217,15 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     public void cancelMessage(View view) {
+        setResult(RES_CANCELED);
         finish();
     }
 
-    public void saveMessage(View view) {
+    /**
+     * Save the message into the database and return it's raw text to calling activity
+     * @param view
+     */
+    public void saveMessage(@Nullable View view) {
         // process the message and tags
         Spannable sMessage = editMessage.getText();
         String outputMessageText = "";
@@ -215,21 +250,41 @@ public class MessageActivity extends AppCompatActivity {
         // replace in db, or delete if made blank
         DaoSession daoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
         MessageDao messageDao = daoSession.getMessageDao();
+        String returnString;
+        Message message = null;
         if(outputMessageText.trim().length() == 0) {
-            // todo: delete the message
+            if(mMessageId != null) {
+                // delete the message
+                messageDao.deleteByKey(mMessageId);
+                // remove unused tags from db
+                TagDao tagDao = daoSession.getTagDao();
+                tagDao.queryBuilder()
+                        .where(TagDao.Properties.MessageId.eq(mMessageId))
+                        .buildDelete()
+                        .executeDeleteWithoutDetachingEntities();
+            }
+
+            returnString = null;
         } else {
-            Message message = new Message(1L, outputMessageText);
-            messageDao.insertOrReplace(message);
+            message = new Message(mMessageId, outputMessageText);
+            mMessageId = messageDao.insertOrReplace(message);
 
             // remove unused tags from db
             TagDao tagDao = daoSession.getTagDao();
             tagDao.queryBuilder()
                     .where(TagDao.Properties.Id.notIn(listOfUsedIds))
-                    .where(TagDao.Properties.MessageId.eq(message.getId()))
+                    .where(TagDao.Properties.MessageId.eq(mMessageId))
                     .buildDelete()
                     .executeDeleteWithoutDetachingEntities();
+
+            returnString = sMessage.toString().trim();
         }
 
+        // Tell the calling activity
+        Intent intent = new Intent();
+        intent.putExtra(RES_MESSAGE_TEXT, returnString);
+        intent.putExtra(RES_MESSAGE_ID, mMessageId);
+        setResult(RES_SAVED,intent);
         finish();
     }
 

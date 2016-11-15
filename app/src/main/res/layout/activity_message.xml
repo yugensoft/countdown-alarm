@@ -23,17 +23,24 @@
             android:layout_height="wrap_content"
             android:text="@string/cancel"
             android:id="@+id/button_cancel"
-            android:onClick="cancelAlarm"
+            android:onClick="cancelMessage"
             style="?android:attr/buttonBarButtonStyle"
             />
-
         <Button
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/save"
             android:id="@+id/button_save"
-            android:onClick="saveAlarm"
+            android:onClick="saveMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/preview"
+            android:id="@+id/button_preview"
+            android:onClick="previewMessage"
             style="?android:attr/buttonBarButtonStyle"
             />
     </LinearLayout>
@@ -45,16 +52,6 @@
         android:layout_below="@+id/ll_buttonbar"
         android:inputType="textVisiblePassword|textMultiLine"
         />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/preview"
-        android:id="@+id/button_preview"
-        android:onClick="previewMessage"
-        android:layout_below="@+id/edit_message"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
 
     <LinearLayout

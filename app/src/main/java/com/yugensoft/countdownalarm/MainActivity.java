@@ -15,6 +15,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+    private static int REQ_ALARM_ACTIVITY = 0;
+
     private Tracker mTracker;
     private DaoSession mDaoSession;
     private AlarmListAdapter alarmListAdapter;
@@ -49,18 +51,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this,AlarmActivity.class);
-        intent.putExtra(AlarmActivity.KEY_ALARM_ID,id);
-        startActivity(intent);
+        startActivityForResult(AlarmActivity.newIntent(this,id),REQ_ALARM_ACTIVITY);
     }
 
-    public void startMessageActivity(@Nullable View view) {
-        startActivity(new Intent(getApplicationContext(),MessageActivity.class));
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQ_ALARM_ACTIVITY){
+            if(resultCode == AlarmActivity.RES_SAVED) {
+                alarmListAdapter.updateAlarms();
+            }
+        }
     }
 
     public void addTempAlarm(View view) {
         String ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
-        Alarm alarm = new Alarm(1L,"0 30 8 ? * * *",1,true,ringtone,true,"test");
+        Alarm alarm = new Alarm(1L,"0 30 8 ? * * *",1,true,ringtone,true,"test",null);
 //        List<Message> messages = mDaoSession.getMessageDao().queryBuilder()
 //                .where(MessageDao.Properties.Id.eq(1))
 //                .list();

@@ -23,14 +23,6 @@ import java.util.Set;
 
 @Entity
 public class Alarm {
-    private static final int CRON_EXPRESSION_SECONDS = 0;
-    private static final int CRON_EXPRESSION_MINUTES = 1;
-    private static final int CRON_EXPRESSION_HOURS = 2;
-    private static final int CRON_EXPRESSION_DAYS_OF_MONTH = 3;
-    private static final int CRON_EXPRESSION_MONTHS = 4;
-    private static final int CRON_EXPRESSION_DAYS_OF_WEEK = 5;
-    private static final int CRON_EXPRESSION_YEARS = 6;
-
     // Schema area
     @Id(autoincrement = true)
     private Long id;
@@ -45,8 +37,19 @@ public class Alarm {
     @NotNull
     private boolean vibrate; // vibrate on/off
     private String label; // user-set name of the alarm
-    @ToOne //todo: why cant this be notnull
+
+    private Long messageId;
+    @ToOne(joinProperty = "messageId")
     private Message message;
+
+    // Constants related to the schedule string
+    private static final int CRON_EXPRESSION_SECONDS = 0;
+    private static final int CRON_EXPRESSION_MINUTES = 1;
+    private static final int CRON_EXPRESSION_HOURS = 2;
+    private static final int CRON_EXPRESSION_DAYS_OF_MONTH = 3;
+    private static final int CRON_EXPRESSION_MONTHS = 4;
+    private static final int CRON_EXPRESSION_DAYS_OF_WEEK = 5;
+    private static final int CRON_EXPRESSION_YEARS = 6;
 
     /**
      * Function to set a standard "hh:mm" + Mon,Tue...Sun repeating alarm / no-repeat
@@ -177,9 +180,9 @@ public class Alarm {
     /** Used for active entity operations. */
     @Generated(hash = 1493767907)
     private transient AlarmDao myDao;
-    @Generated(hash = 1769228008)
-    public Alarm(Long id, @NotNull String schedule, Integer repeats, boolean active, String ringtone,
-            boolean vibrate, String label) {
+    @Generated(hash = 1313305291)
+    public Alarm(Long id, @NotNull String schedule, Integer repeats, boolean active, String ringtone, boolean vibrate, String label,
+            Long messageId) {
         this.id = id;
         this.schedule = schedule;
         this.repeats = repeats;
@@ -187,7 +190,9 @@ public class Alarm {
         this.ringtone = ringtone;
         this.vibrate = vibrate;
         this.label = label;
+        this.messageId = messageId;
     }
+
     @Generated(hash = 1972324134)
     public Alarm() {
     }
@@ -222,34 +227,38 @@ public class Alarm {
     public void setLabel(String label) {
         this.label = label;
     }
-    @Generated(hash = 1103821362)
-    private transient boolean message__refreshed;
+    @Generated(hash = 1728529602)
+    private transient Long message__resolvedKey;
+
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 955954570)
+    @Generated(hash = 1905538284)
     public Message getMessage() {
-        if (message != null || !message__refreshed) {
+        Long __key = this.messageId;
+        if (message__resolvedKey == null || !message__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
             MessageDao targetDao = daoSession.getMessageDao();
-            targetDao.refresh(message);
-            message__refreshed = true;
+            Message messageNew = targetDao.load(__key);
+            synchronized (this) {
+                message = messageNew;
+                message__resolvedKey = __key;
+            }
         }
         return message;
     }
-    /** To-one relationship, returned entity is not refreshed and may carry only the PK property. */
-    @Generated(hash = 93566467)
-    public Message peakMessage() {
-        return message;
-    }
+
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 840221457)
+    @Generated(hash = 770507318)
     public void setMessage(Message message) {
         synchronized (this) {
             this.message = message;
-            message__refreshed = true;
+            messageId = message == null ? null : message.getId();
+            message__resolvedKey = messageId;
         }
     }
+
     /**
      * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
      * Entity must attached to an entity context.
@@ -294,6 +303,14 @@ public class Alarm {
     }
     public Integer getRepeats() {
         return this.repeats;
+    }
+
+    public Long getMessageId() {
+        return this.messageId;
+    }
+
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
     }
 
     /** called by internal mechanisms, do not call yourself. */

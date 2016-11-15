@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     >
 
+    <Preference
+        android:key="message"
+        android:title="Message to play"
+        android:summary=""
+        />
     <MultiSelectListPreference
         android:key="repeat"
         android:title="Repeat"

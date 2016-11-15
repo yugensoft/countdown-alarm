@@ -1,6 +1,7 @@
 package com.yugensoft.countdownalarm;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -11,7 +12,6 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.Fragment;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -19,10 +19,6 @@ import android.widget.Toast;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.joda.time.convert.DurationConverter;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -44,6 +40,9 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_ALARM_ID = "alarm-id";
 
+    // request codes
+    public static final int REQ_MESSAGE = 0;
+
     private DaoSession daoSession;
     // Alarm ID passed into this fragment
     private long mAlarmId;
@@ -57,6 +56,7 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
     private OnFragmentInteractionListener mListener;
 
     private TimePicker mTimePicker;
+    private Preference mPrefMessage;
 
     public AlarmPreferencesFragment() {
         // Required empty public constructor
@@ -93,8 +93,26 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
         // construct the preferencefragment (internal)
         addPreferencesFromResource(R.xml.alarm_preferences);
 
-        // Manual connection of the preferences to the database
-        // Preference storage system isn't used as all preferences are set to FALSE persistent
+        /**
+         * Manual connection of the preferences to the database
+         * Preference storage system isn't used as all preferences are set to FALSE persistent
+         */
+
+        mPrefMessage = getPreferenceManager().findPreference("message");
+        final Long messageId = mAlarm.getMessageId();
+        if(messageId != null){
+            String taggedText = mAlarm.getMessage().getText();
+            mPrefMessage.setSummary(MessageActivity.renderTaggedText(taggedText,daoSession.getTagDao(),getActivity()).toString());
+        }
+        mPrefMessage.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                startActivityForResult(MessageActivity.newIntent(getActivity(),messageId), REQ_MESSAGE);
+                return true;
+            }
+        });
+
+
         final MultiSelectListPreference prefRepeat = (MultiSelectListPreference)getPreferenceManager().findPreference("repeat");
         mRepeatDays = mAlarm.getScheduleRepeatDays().fullWords;
         prefRepeat.setValues(mRepeatDays);
@@ -166,6 +184,31 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
             }
         });
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQ_MESSAGE){
+            switch (resultCode){
+                case MessageActivity.RES_CANCELED:
+                    // do nothing
+                    break;
+                case MessageActivity.RES_SAVED:
+                    String messageText = data.getStringExtra(MessageActivity.RES_MESSAGE_TEXT);
+                    mPrefMessage.setSummary(messageText);
+
+                    long rawMessageId = data.getLongExtra(MessageActivity.RES_MESSAGE_ID, -1);
+                    Long messageId = (rawMessageId == -1 ? null : rawMessageId);
+                    Message message = null;
+                    if(messageId != null){
+                        message = daoSession.getMessageDao().loadByRowId(messageId);
+                    }
+                    mAlarm.setMessage(message);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown result");
+            }
+        }
     }
 
     private String getRingtoneTitleFromUri(String uri) {

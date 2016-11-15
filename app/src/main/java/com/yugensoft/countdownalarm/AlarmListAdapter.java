@@ -96,7 +96,7 @@ public class AlarmListAdapter extends BaseAdapter {
         wAlarmTime.setText(alarm.getScheduleAlarmTime(mActivity).humanReadable);
         wAlarmSchedule.setText(alarm.getScheduleRepeatDays().humanReadable);
         wAlarmLabel.setText(alarm.getLabel());
-        if(alarm.peakMessage() == null) {
+        if(alarm.getMessageId() == null) {
             wMessage.setVisibility(View.INVISIBLE);
         }else{
             wMessage.setVisibility(View.VISIBLE);
@@ -108,7 +108,7 @@ public class AlarmListAdapter extends BaseAdapter {
 //    private View.OnClickListener textAreaClickListener = new View.OnClickListener() {
 //        @Override
 //        public void onClick(View v) {
-//            // todo: launch alarm edit activity
+//
 //        }
 //    };
 

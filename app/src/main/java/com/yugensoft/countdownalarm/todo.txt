@@ -3,15 +3,17 @@ Message:
 make layout and buttons look decent
 
 Alarm interface:
+- add 'add alarm'
 - alarm schedule not working, initialize or save
-- mainactivity list needs notifydatachanged on finish
-- add message preference
+- async stuff to speed up loading
 
 Alarm functionality:
 todo
 - remember vibrate
 
 Others:
+saveinstancestate (use icepick)
+onUpgrade() of db needs to be implemented
 ads
 cleanup bugs and to-dos
 make some 'espresso tests'
