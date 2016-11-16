@@ -22,6 +22,8 @@ import org.greenrobot.greendao.async.AsyncSession;
 import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -86,15 +88,21 @@ public class AlarmListAdapter extends BaseAdapter {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 alarm.setActive(isChecked);
                 mDaoSession.insertOrReplace(alarm);
+                ((MainActivity)mActivity).engageAlarm(alarm);
+                if(isChecked) {
+                    AlarmTimeFormatter.getNextAlarmTime(alarm.getNextAlarmTime(), mActivity);
+                }
             }
         });
 
-//        llAlarmSchedule.setOnClickListener(textAreaClickListener);
-//        llAlarmLabel.setOnClickListener(textAreaClickListener);
         // populate data
         wActive.setChecked(alarm.getActive());
         wAlarmTime.setText(alarm.getScheduleAlarmTime(mActivity).humanReadable);
-        wAlarmSchedule.setText(alarm.getScheduleRepeatDays().humanReadable);
+
+        String scheduleText = alarm.getScheduleRepeatDays().humanReadable;
+        scheduleText = scheduleText.equals("Never") ? "" : scheduleText;
+        wAlarmSchedule.setText(scheduleText);
+
         wAlarmLabel.setText(alarm.getLabel());
         if(alarm.getMessageId() == null) {
             wMessage.setVisibility(View.INVISIBLE);
@@ -105,21 +113,18 @@ public class AlarmListAdapter extends BaseAdapter {
         return convertView;
     }
 
-//    private View.OnClickListener textAreaClickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//
-//        }
-//    };
-
 
     public void updateAlarms(){
         Query alarmQuery = mDaoSession.getAlarmDao().queryBuilder().build();
         AsyncSession asyncSession = mDaoSession.startAsyncSession();
+
         asyncSession.setListener(new AsyncOperationListener() {
             @Override
             public void onAsyncOperationCompleted(AsyncOperation operation) {
-                mAlarms = (List<Alarm>)operation.getResult();
+                List<Alarm>alarmsToSort = (List<Alarm>)operation.getResult();
+                AlarmComparator comparator = new AlarmComparator();
+                Collections.sort(alarmsToSort,comparator);
+                mAlarms = alarmsToSort;
             }
         });
         asyncSession.queryList(alarmQuery);

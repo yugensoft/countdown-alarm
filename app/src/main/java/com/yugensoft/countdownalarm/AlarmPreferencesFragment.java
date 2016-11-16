@@ -266,23 +266,12 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
     }
 
     public void saveAlarm(){
+        // assume on save that the alarm is to be activated too
+        mAlarm.setActive(true);
+        // save it
         daoSession.insertOrReplace(mAlarm);
 
-        StringBuilder sb = new StringBuilder("Alarm is set for ");
-        DateTime nextAlarmTime = new DateTime(mAlarm.getNextAlarmTime());
-        Period period = new Period(DateTime.now(),nextAlarmTime);
-        PeriodFormatter formatter = new PeriodFormatterBuilder()
-                .printZeroRarelyLast()
-                .appendDays()
-                .appendSuffix(" days ")
-                .appendHours()
-                .appendSuffix(" hours ")
-                .appendMinutes()
-                .appendSuffix(" minutes ")
-                .toFormatter();
-        sb.append(formatter.print(period)).append(" from now.");
-
-        Toast.makeText(getActivity(), sb.toString(), Toast.LENGTH_LONG).show();
+        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),getActivity());
     }
 
 

@@ -52,7 +52,10 @@ public class AlarmActivity extends AppCompatActivity {
 
     public void saveAlarm(@Nullable View view) {
         mFragment.saveAlarm();
-        setResult(RES_SAVED);
+
+        Intent data = new Intent();
+        data.putExtra(KEY_ALARM_ID,mAlarmId);
+        setResult(RES_SAVED,data);
         finish();
     }
 }

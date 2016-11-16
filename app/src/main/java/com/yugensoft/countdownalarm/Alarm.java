@@ -1,6 +1,7 @@
 package com.yugensoft.countdownalarm;
 
 import android.content.Context;
+import android.media.RingtoneManager;
 import android.util.Log;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -16,6 +17,9 @@ import org.quartz.CronExpression;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
@@ -42,14 +46,19 @@ public class Alarm {
     @ToOne(joinProperty = "messageId")
     private Message message;
 
+    public static Alarm newDefaultAlarm(){
+        String ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString();
+        return new Alarm(null, "0 0 8 ? * * *", 1, true, ringtone, true, "", null);
+    }
+
     // Constants related to the schedule string
-    private static final int CRON_EXPRESSION_SECONDS = 0;
-    private static final int CRON_EXPRESSION_MINUTES = 1;
-    private static final int CRON_EXPRESSION_HOURS = 2;
-    private static final int CRON_EXPRESSION_DAYS_OF_MONTH = 3;
-    private static final int CRON_EXPRESSION_MONTHS = 4;
-    private static final int CRON_EXPRESSION_DAYS_OF_WEEK = 5;
-    private static final int CRON_EXPRESSION_YEARS = 6;
+    public static final int CRON_EXPRESSION_SECONDS = 0;
+    public static final int CRON_EXPRESSION_MINUTES = 1;
+    public static final int CRON_EXPRESSION_HOURS = 2;
+    public static final int CRON_EXPRESSION_DAYS_OF_MONTH = 3;
+    public static final int CRON_EXPRESSION_MONTHS = 4;
+    public static final int CRON_EXPRESSION_DAYS_OF_WEEK = 5;
+    public static final int CRON_EXPRESSION_YEARS = 6;
 
     /**
      * Function to set a standard "hh:mm" + Mon,Tue...Sun repeating alarm / no-repeat
@@ -69,7 +78,7 @@ public class Alarm {
             // repeat on the given days
             repeats = null;
             SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
-            SimpleDateFormat sdfLong = new SimpleDateFormat("EEE", Locale.getDefault());
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.getDefault());
 
             for (String sLong : repeatDays){
                 try {
@@ -89,6 +98,44 @@ public class Alarm {
     }
 
     /**
+     * Comparator function used to sort days by weekly order
+     */
+    private static class DayComparator implements Comparator<String>{
+        @Override
+        public int compare(String o1, String o2) {
+            // get day numbers
+            int day1, day2;
+            day1 = getDayOfWeekNumber(o1);
+            day2 = getDayOfWeekNumber(o2);
+
+            return Integer.valueOf(day1).compareTo(day2);
+        }
+
+        private int getDayOfWeekNumber(String day){
+            if(day.length()<3) {
+                throw new IllegalArgumentException("Not a valid day");
+            }
+            String daySelector = day.substring(0,3).toLowerCase();
+            if(daySelector.equals("mon")) {
+                return 1;
+            } else if(daySelector.equals("tue")) {
+                return 2;
+            } else if(daySelector.equals("wed")) {
+                return 3;
+            } else if(daySelector.equals("thu")) {
+                return 4;
+            } else if(daySelector.equals("fri")) {
+                return 5;
+            } else if(daySelector.equals("sat")) {
+                return 6;
+            } else if(daySelector.equals("sun")) {
+                return 7;
+            } else {
+                throw new IllegalArgumentException("Invalid day string passed");
+            }
+        }
+    }
+    /**
      * @return The schedule in a human-readable string
      */
     public WeeklyRepeatDaysType getScheduleRepeatDays(){
@@ -103,7 +150,7 @@ public class Alarm {
             Set<String> outputFullWords = new HashSet<String>();
 
             SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
-            SimpleDateFormat sdfLong = new SimpleDateFormat("EEE", Locale.getDefault());
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.getDefault());
 
             String token = "";
             String[] daysList = daysOfWeek.split(",");
@@ -117,7 +164,12 @@ public class Alarm {
                 if(daysList.length == 1) {
                     // Use full day name if only one day
                     outputHumanReadable.append(sdfLong.format(sdfShort.parse(daysList[0])));
+                } else if(daysList.length == 7) {
+                    // Just say 'day' if all days
+                    outputHumanReadable.append("day");
                 } else {
+                    // Sort days in weekly order
+                    Arrays.sort(daysList,new DayComparator());
                     // Use short day names
                     for (String day : daysList) {
                         outputHumanReadable.append(token).append(day);

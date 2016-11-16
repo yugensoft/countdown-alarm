@@ -1,23 +1,26 @@
 TODO:
-Message:
-make layout and buttons look decent
-
-Alarm interface:
-- add 'add alarm'
-- alarm schedule not working, initialize or save
-- async stuff to speed up loading
 
 Alarm functionality:
-todo
-- remember vibrate
+- think how to reliably re-set repeating alarms, sync up checkbox-db-alarmIntents
+- add message & mixing with alarm
+- indicator of next alarm and it's trigger time
+- add snooze
+- add notification item
+
+context menu:
+- delete (also removes pendingIntent)
+- preview
 
 Others:
+make layout and buttons look decent
+async stuff to speed up loading
 saveinstancestate (use icepick)
 onUpgrade() of db needs to be implemented
 ads
 cleanup bugs and to-dos
 make some 'espresso tests'
 add a stackexchange answer about the preferencefrag-db linking
+add terms-of-use agreement start
 
 -- revisit --
 the TTS engine needs to be checked for an installed before the app can be used.
@@ -28,6 +31,7 @@ add all tracking
 =next revision todo=
 in-app-bill
 premium functionality
+context menu: duplicate
 
 ----------------------------------------------
 other notes:

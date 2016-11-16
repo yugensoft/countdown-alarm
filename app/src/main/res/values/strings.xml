@@ -29,9 +29,11 @@
     </string-array>
 
 
-
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="alarm_activity_title">Set alarm</string>
     <string name="default_message">Good morning!</string>
+    <string name="add_alarm">Add Alarm</string>
+    <string name="snooze">Snooze</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
