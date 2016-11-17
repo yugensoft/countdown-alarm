@@ -271,7 +271,7 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
         // save it
         daoSession.insertOrReplace(mAlarm);
 
-        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),getActivity());
+        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity());
     }
 
 

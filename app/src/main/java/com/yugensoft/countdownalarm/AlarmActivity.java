@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,7 +12,7 @@ import android.view.View;
 
 import butterknife.ButterKnife;
 
-public class AlarmActivity extends AppCompatActivity {
+public class AlarmActivity extends AppCompatActivity implements AlarmPreferencesFragment.OnFragmentInteractionListener{
     public static String KEY_ALARM_ID = "alarm-id";
 
     public static int RES_CANCELED = 0;
@@ -57,5 +58,10 @@ public class AlarmActivity extends AppCompatActivity {
         data.putExtra(KEY_ALARM_ID,mAlarmId);
         setResult(RES_SAVED,data);
         finish();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        // not used
     }
 }

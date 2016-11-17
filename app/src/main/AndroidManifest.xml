@@ -34,9 +34,9 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".AlarmReceiverActivity"
-            />
+        <service android:name=".AlarmPlayerIntentService"/>
+
+        <activity android:name=".AlarmReceiverActivity" />
 
     </application>
 

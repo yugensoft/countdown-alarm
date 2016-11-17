@@ -1,51 +1,56 @@
 package com.yugensoft.countdownalarm;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import java.io.IOException;
+import org.joda.time.DateTime;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import java.io.IOException;
 
 public class AlarmReceiverActivity extends AppCompatActivity {
     public static final String KEY_ALARM_ID = "alarm-id";
     public static final String KEY_RINGTONE_URI = "ringtone-uri";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_ALARM_TIME = "alarm-time";
+    public static final String KEY_VIBRATE = "vibrate";
 
-    private MediaPlayer mMediaPlayer;
-    private Vibrator mVibrator;
-    private static final long[] VIBRATION_PATTERN = {0,500,500};
-
-    private TextView mTextAlarmTime;
+    private TextView mTextTime;
 
     private long mAlarmId;
     private String mRingtoneUri;
     private String mAlarmTime;
     private String mMessage;
+    private boolean mVibrate;
 
-    public static Intent newIntent(Context context, long alarmId, String ringtoneUri, String alarmTime, @Nullable String message){
+    private Intent mAlarmPlayerIntent;
+
+    public static Intent newIntent(
+            Context context,
+            long alarmId,
+            String ringtoneUri,
+            String alarmTime,
+            boolean vibrate,
+            @Nullable String message
+    ){
         Intent intent = new Intent(context, AlarmReceiverActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(KEY_ALARM_ID, alarmId);
         intent.putExtra(KEY_RINGTONE_URI, ringtoneUri);
         intent.putExtra(KEY_MESSAGE, message);
         intent.putExtra(KEY_ALARM_TIME, alarmTime);
+        intent.putExtra(KEY_VIBRATE, vibrate);
         return intent;
     }
 
@@ -57,10 +62,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_alarm_receiver);
 
-        mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        mMediaPlayer = new MediaPlayer();
-
-        mTextAlarmTime = (TextView)findViewById(R.id.text_alarm_time);
+        mTextTime = (TextView)findViewById(R.id.text_time);
 
         // load arguments
         Intent intent = getIntent();
@@ -68,26 +70,15 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         mAlarmTime = intent.getStringExtra(KEY_ALARM_TIME);
         mMessage = intent.getStringExtra(KEY_MESSAGE);
         mRingtoneUri = intent.getStringExtra(KEY_RINGTONE_URI);
+        mVibrate = intent.getBooleanExtra(KEY_VIBRATE, false);
 
-        mTextAlarmTime.setText(mAlarmTime); // todo: design decision: alarm time or current time?
-        playSound(this, Uri.parse(mRingtoneUri));
-        mVibrator.vibrate(VIBRATION_PATTERN,0);
+        DateTime now = new DateTime();
+        String time = AlarmTimeFormatter.convertTimeToReadable(now.getHourOfDay(),now.getMinuteOfHour(),this);
+        mTextTime.setText(time);
 
-    }
-
-    private void playSound(Context context, Uri alarm) {
-        try {
-            mMediaPlayer.setDataSource(context, alarm);
-            final AudioManager audioManager = (AudioManager) context
-                    .getSystemService(Context.AUDIO_SERVICE);
-            if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-                mMediaPlayer.prepare();
-                mMediaPlayer.start();
-            }
-        } catch (IOException e) {
-            System.out.println("Problem playing the alarm");
-        }
+        // Start the alarm player
+        mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
+        startService(mAlarmPlayerIntent);
     }
 
     public void snoozeAlarm(@Nullable View view) {
@@ -95,8 +86,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     }
 
     public void dismissAlarm(@Nullable View view) {
-        mMediaPlayer.stop();
-        mVibrator.cancel();
+        stopService(mAlarmPlayerIntent);
         finish();
     }
 }

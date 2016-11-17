@@ -3,9 +3,9 @@ package com.yugensoft.countdownalarm;
 import java.util.Comparator;
 
 /**
- * Function to return a Comparator used for sorting alarms by time
+ * Function to return a Comparator used for sorting alarms by scheduled time hours/minutes
  */
-public class AlarmComparator implements Comparator<Alarm> {
+public class AlarmScheduleTimeComparator implements Comparator<Alarm> {
     @Override
     public int compare(Alarm o1, Alarm o2) {
         String[] cronParts1 = o1.getSchedule().split("\\s+");

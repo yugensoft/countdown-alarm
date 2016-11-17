@@ -19,6 +19,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        android:layout_below="@id/text_next_alarm"
         android:id="@+id/listview_alarms"
         />
 
@@ -43,7 +44,7 @@
         android:layout_marginStart="51dp"
         android:layout_marginBottom="24dp"
         android:id="@+id/button_test_alarm"
-        android:onClick="testAlarm"
+        android:onClick="test"
         />
 
 </RelativeLayout>

@@ -17,9 +17,15 @@ import android.widget.ListView;
 
 import com.google.android.gms.analytics.Tracker;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
@@ -53,12 +59,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 this,
                 mDaoSession
         );
-        alarmListAdapter.updateAlarms();
         alarmListView.setAdapter(alarmListAdapter);
         alarmListView.setOnItemClickListener(this);
+        alarmListAdapter.updateAlarms();
 
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        engageAllAlarms();
+//        engageAllAlarms(); //todo
     }
 
 
@@ -88,10 +94,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         startActivityForResult(AlarmActivity.newIntent(this, alarmId), REQ_ALARM_ACTIVITY);
     }
 
-    public void testAlarm(@Nullable View view) {
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.SECOND, 30);
-        AlarmTimeFormatter.getNextAlarmTime(c.getTime(), this);
+    public void test(@Nullable View view) {
+        List<Alarm> alarms = mDaoSession.getAlarmDao().loadAll();
+        Alarm firstAlarm = alarms.get(0);
+        DateTime now = new DateTime();
+        now = now.withDurationAdded(new Duration(60 * 1000), 1);
+        Set<String> blankRepeats = new HashSet<>();
+        firstAlarm.setSchedule(now.getHourOfDay(),now.getMinuteOfHour(),blankRepeats);
+        firstAlarm.setRepeats(1);
+        firstAlarm.setActive(true);
+        mDaoSession.getAlarmDao().update(firstAlarm);
+        engageAlarm(firstAlarm);
+        alarmListAdapter.updateAlarms();
     }
 
     /**
@@ -133,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         alarm.getId(),
                         alarm.getRingtone(),
                         alarm.getScheduleAlarmTime(this).humanReadable,
+                        alarm.getVibrate(),
                         message
                 ),
                 PendingIntent.FLAG_CANCEL_CURRENT

@@ -16,7 +16,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/text_alarm_time"
+        android:id="@+id/text_time"
         android:gravity="center"
         android:textSize="26sp"
         />

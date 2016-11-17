@@ -57,19 +57,6 @@ public class MessageActivity extends AppCompatActivity {
         return intent;
     }
 
-    // setup TTS
-    public void onInit(int initStatus) {
-
-        // check for successful instantiation
-        if (initStatus == TextToSpeech.SUCCESS) {
-            if (tts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE)
-                tts.setLanguage(Locale.US);
-        } else if (initStatus == TextToSpeech.ERROR) {
-            Toast.makeText(this, "Sorry! Text To Speech failed...",
-                    Toast.LENGTH_LONG).show();
-        }
-    }
-
     private TextWatcher messageTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -128,7 +115,7 @@ public class MessageActivity extends AppCompatActivity {
         SpannableStringBuilder messageText = renderTaggedText(taggedText, daoSession.getTagDao(), this);
         editMessage.setText(messageText);
 
-        // check for TTS data
+        // check for TTS data // todo: should be done higher up
         Intent checkTTSIntent = new Intent();
         checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
@@ -187,7 +174,13 @@ public class MessageActivity extends AppCompatActivity {
                 tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int status) {
-
+                        // check for successful instantiation
+                        if (status == TextToSpeech.SUCCESS) {
+                            if (tts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE)
+                                tts.setLanguage(Locale.US);
+                        } else if (status == TextToSpeech.ERROR) {
+                            throw new RuntimeException("Text-to-speech failed.");
+                        }
                     }
                 });
             } else {

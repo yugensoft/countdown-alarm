@@ -2,14 +2,8 @@ TODO:
 
 Alarm functionality:
 - think how to reliably re-set repeating alarms, sync up checkbox-db-alarmIntents
-- add message & mixing with alarm
-- indicator of next alarm and it's trigger time
 - add snooze
 - add notification item
-
-context menu:
-- delete (also removes pendingIntent)
-- preview
 
 Others:
 make layout and buttons look decent

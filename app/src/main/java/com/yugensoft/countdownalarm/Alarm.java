@@ -2,7 +2,6 @@ package com.yugensoft.countdownalarm;
 
 import android.content.Context;
 import android.media.RingtoneManager;
-import android.util.Log;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
@@ -10,15 +9,11 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.DaoException;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.quartz.CronExpression;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -202,14 +197,9 @@ public class Alarm {
 
         int hour = Integer.valueOf(cronParts[CRON_EXPRESSION_HOURS]);
         int minute = Integer.valueOf(cronParts[CRON_EXPRESSION_MINUTES]);
-        DateTime dateTime = new DateTime(2000,1,1,hour,minute);
-        DateTimeFormatter fmt;
-        if (android.text.format.DateFormat.is24HourFormat(context)) {
-            fmt = DateTimeFormat.forPattern("HH:mm");
-        } else {
-            fmt = DateTimeFormat.forPattern("hh:mm a");
-        }
-        return new AlarmTimeType(hour, minute, fmt.print(dateTime));
+
+        String time = AlarmTimeFormatter.convertTimeToReadable(hour,minute,context);
+        return new AlarmTimeType(hour, minute, time);
     }
 
     /**
