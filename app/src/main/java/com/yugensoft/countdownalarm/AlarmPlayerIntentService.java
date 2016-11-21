@@ -104,18 +104,20 @@ public class AlarmPlayerIntentService extends IntentService {
 
             // Loop until intentService stopped
             while(true) {
-                // Fade ready for message
-                fade(mMediaPlayer,SETTING_FADE_OUT_TO_TTS_TIME,1.0f,0.2f);
+                if(mMessage != null){
+                    // Fade ready for message
+                    fade(mMediaPlayer,SETTING_FADE_OUT_TO_TTS_TIME,1.0f,0.2f);
 
-                int test = 0;
+                    int test = 0;
 
-                // Play message
-                mTts.setOnUtteranceCompletedListener(ttsListener);
-                isSpeaking = true;
-                mTts.speak(mMessage, TextToSpeech.QUEUE_FLUSH, params);
+                    // Play message
+                    mTts.setOnUtteranceCompletedListener(ttsListener);
+                    isSpeaking = true;
+                    mTts.speak(mMessage, TextToSpeech.QUEUE_FLUSH, params);
 
-                while(isSpeaking){
-                    Thread.sleep(200);
+                    while(isSpeaking){
+                        Thread.sleep(200);
+                    }
                 }
 
                 if (SETTING_REPEAT_DELAY < 0){

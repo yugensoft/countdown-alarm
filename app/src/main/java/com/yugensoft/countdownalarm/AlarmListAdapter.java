@@ -1,8 +1,13 @@
 package com.yugensoft.countdownalarm;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -21,10 +26,15 @@ import org.greenrobot.greendao.async.AsyncOperation;
 import org.greenrobot.greendao.async.AsyncOperationListener;
 import org.greenrobot.greendao.async.AsyncSession;
 import org.greenrobot.greendao.query.Query;
+import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 
 public class AlarmListAdapter extends BaseAdapter {
@@ -36,7 +46,6 @@ public class AlarmListAdapter extends BaseAdapter {
     private List<Alarm> mAlarms;
 
     private TextView mTextNextAlarm;
-    private String mNextAlarm;
 
     public AlarmListAdapter(Activity activity, DaoSession daoSession) {
         mActivity = activity;
@@ -99,10 +108,16 @@ public class AlarmListAdapter extends BaseAdapter {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 alarm.setActive(isChecked);
                 mDaoSession.insertOrReplace(alarm);
-                ((MainActivity)mActivity).engageAlarm(alarm);
+                AlarmFunctions.engageAlarm(
+                        alarm,
+                        mActivity,
+                        mDaoSession,
+                        (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
+                );
                 if(isChecked) {
                     AlarmTimeFormatter.getNextAlarmTime(alarm.getNextAlarmTime(),true, mActivity);
                 }
+                updateNextAlarm();
             }
         });
         // alarm time
@@ -153,30 +168,55 @@ public class AlarmListAdapter extends BaseAdapter {
         // first deactivate it and disengage it
         Alarm alarm = mDaoSession.getAlarmDao().load(alarmId);
         alarm.setActive(false);
-        ((MainActivity)mActivity).engageAlarm(alarm);
+        AlarmFunctions.engageAlarm(
+                alarm,
+                mActivity,
+                mDaoSession,
+                (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
+        );
         // delete it
         mDaoSession.getAlarmDao().delete(alarm);
         updateAlarms();
     }
 
     private void previewAlarm(long alarmId) {
+        // get snooze details
+        long snoozeDuration = SettingsActivity.getSnoozeDurationInMs(mActivity);
+
+        // get alarm and pass details to alarm-reciever
         Alarm alarm = mDaoSession.getAlarmDao().load(alarmId);
+        String message;
+        if(alarm.getMessageId() == null) {
+            message = null;
+        } else {
+            message = MessageActivity.renderTaggedText(
+                    alarm.getMessage().getText(),
+                    mDaoSession.getTagDao(),
+                    mActivity
+            ).toString();
+        }
         Intent intent = AlarmReceiverActivity.newIntent(
                 mActivity,
                 alarmId,
                 alarm.getRingtone(),
                 alarm.getScheduleAlarmTime(mActivity).humanReadable,
+                new Date().getTime(),
+                snoozeDuration,
                 alarm.getVibrate(),
-                MessageActivity.renderTaggedText(
-                        alarm.getMessage().getText(),
-                        mDaoSession.getTagDao(),
-                        mActivity
-                ).toString()
+                message
         );
         mActivity.startActivity(intent);
     }
 
-
+    /**
+     * Function to update all the alarms, which means:
+     * - query the alarms
+     * - sort them by scheduled time
+     * - save that data into this adapter
+     * - determine the next alarm, if any
+     * -- set an android notification
+     * - update the views
+     */
     public void updateAlarms(){
         Query alarmQuery = mDaoSession.getAlarmDao().queryBuilder().build();
         AsyncSession asyncSession = mDaoSession.startAsyncSession();
@@ -185,10 +225,6 @@ public class AlarmListAdapter extends BaseAdapter {
             @Override
             public void onAsyncOperationCompleted(AsyncOperation operation) {
                 List<Alarm>alarmsToSort = (List<Alarm>)operation.getResult();
-
-                // get the next alarm that will go off
-                Date nextAlarm = Collections.min(alarmsToSort,new AlarmNextTimeComparator()).getNextAlarmTime();
-                mNextAlarm = "Next alarm is at " + AlarmTimeFormatter.convertTimeToReadable(nextAlarm,mActivity);
 
                 // sort the alarms by scheduled time
                 AlarmScheduleTimeComparator comparator = new AlarmScheduleTimeComparator();
@@ -199,7 +235,7 @@ public class AlarmListAdapter extends BaseAdapter {
                     @Override
                     public void run() {
                         notifyDataSetChanged();
-                        mTextNextAlarm.setText(mNextAlarm);
+                        updateNextAlarm();
                     }
                 });
 
@@ -207,5 +243,66 @@ public class AlarmListAdapter extends BaseAdapter {
         });
         asyncSession.queryList(alarmQuery);
 
+    }
+
+    /**
+     * Update information as to when the next alarm will run
+     */
+    public void updateNextAlarm(){
+        List<Alarm> alarmsCopy = new ArrayList<Alarm>(mAlarms);
+
+        // remove any inactive alarms
+        for(Iterator<Alarm> iter = alarmsCopy.iterator(); iter.hasNext();){
+            Alarm alarm = iter.next();
+            if(!alarm.getActive()){
+                iter.remove();
+            }
+        }
+
+        // get the next alarm that will go off
+        String mNextAlarm;
+        if(alarmsCopy.size() > 0) {
+            Date nextAlarm = Collections.min(alarmsCopy, new AlarmNextTimeComparator()).getNextAlarmTime();
+            mNextAlarm = "Next alarm is at " + AlarmTimeFormatter.convertTimeToReadable(nextAlarm, mActivity);
+        } else {
+            mNextAlarm = "";
+        }
+
+        mTextNextAlarm.setText(mNextAlarm);
+        setNotification(mNextAlarm);
+    }
+
+    /**
+     * Function to create an android notification for the existence of a pending alarm
+     * @param text The alarm information
+     */
+    private void setNotification(String text) {
+        NotificationCompat.Builder builder =
+                (android.support.v7.app.NotificationCompat.Builder)
+                new NotificationCompat.Builder(mActivity)
+                .setSmallIcon(R.drawable.ic_action_alarm)
+                .setContentTitle(mActivity.getTitle())
+                .setContentText(text);
+        // Make the notification bring the user back to the main activity on click
+        Intent resultIntent = new Intent(mActivity, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        mActivity,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        builder.setContentIntent(resultPendingIntent);
+        // Sets an ID for the notification
+        int mNotificationId = 001;
+        // Gets an instance of the NotificationManager service
+        NotificationManager mNotifyMgr =
+                (NotificationManager) mActivity.getSystemService(NOTIFICATION_SERVICE);
+        // Builds the notification and issues it, or cancels it if blank
+        if(text.isEmpty()) {
+            mNotifyMgr.cancel(mNotificationId);
+        } else {
+            mNotifyMgr.notify(mNotificationId, builder.build());
+        }
     }
 }

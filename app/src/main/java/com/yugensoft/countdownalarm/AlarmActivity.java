@@ -12,14 +12,17 @@ import android.view.View;
 
 import butterknife.ButterKnife;
 
-public class AlarmActivity extends AppCompatActivity implements AlarmPreferencesFragment.OnFragmentInteractionListener{
+public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceFragment.OnFragmentInteractionListener{
     public static String KEY_ALARM_ID = "alarm-id";
 
     public static int RES_CANCELED = 0;
     public static int RES_SAVED = 1;
 
+    // loaded from intent
     private long mAlarmId;
-    private AlarmPreferencesFragment mFragment;
+
+    // main fragment
+    private AlarmPreferenceFragment mFragment;
 
     public static Intent newIntent(Context context, long id){
         Intent intent = new Intent(context,AlarmActivity.class);
@@ -38,7 +41,7 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferences
         // Insert the Preferences fragment
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        mFragment = AlarmPreferencesFragment.newInstance(mAlarmId);
+        mFragment = AlarmPreferenceFragment.newInstance(mAlarmId);
 
         fragmentTransaction.add(R.id.ll_fragment,mFragment);
         fragmentTransaction.commit();

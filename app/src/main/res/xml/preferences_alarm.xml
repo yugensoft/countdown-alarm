@@ -10,7 +10,7 @@
         android:title="Message to play"
         android:summary=""
         />
-    <MultiSelectListPreference
+    <com.yugensoft.countdownalarm.ExtMultiSelectListPreference
         android:key="repeat"
         android:title="Repeat"
         android:summary=""

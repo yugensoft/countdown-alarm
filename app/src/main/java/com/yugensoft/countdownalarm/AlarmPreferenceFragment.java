@@ -15,12 +15,6 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TimePicker;
-import android.widget.Toast;
-
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.util.List;
 import java.util.Set;
@@ -29,12 +23,12 @@ import java.util.Set;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AlarmPreferencesFragment.OnFragmentInteractionListener} interface
+ * {@link AlarmPreferenceFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link AlarmPreferencesFragment#newInstance} factory method to
+ * Use the {@link AlarmPreferenceFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AlarmPreferencesFragment extends PreferenceFragment {
+public class AlarmPreferenceFragment extends PreferenceFragment {
     private static final String TAG = "alarm-pref-fragment";
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -48,17 +42,19 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
     private long mAlarmId;
     // All alarm parameters stored here, with exception of time/repeats, which are combined into schedule
     private Alarm mAlarm;
+
     // Time/repeats temporary store-on-change
-    private int mHour;
-    private int mMinute;
-    private Set<String> mRepeatDays;
+    // Reloaded in onCreate(), so doesn't need to be in savedInstanceState
+    int mHour;
+    int mMinute;
+    Set<String> mRepeatDays;
 
     private OnFragmentInteractionListener mListener;
 
     private TimePicker mTimePicker;
     private Preference mPrefMessage;
 
-    public AlarmPreferencesFragment() {
+    public AlarmPreferenceFragment() {
         // Required empty public constructor
     }
 
@@ -67,10 +63,10 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
      * this fragment using the provided parameters.
      *
      * @param alarmId Parameter 1.
-     * @return A new instance of fragment AlarmPreferencesFragment.
+     * @return A new instance of fragment AlarmPreferenceFragment.
      */
-    public static AlarmPreferencesFragment newInstance(long alarmId) {
-        AlarmPreferencesFragment fragment = new AlarmPreferencesFragment();
+    public static AlarmPreferenceFragment newInstance(long alarmId) {
+        AlarmPreferenceFragment fragment = new AlarmPreferenceFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_ALARM_ID, alarmId);
         fragment.setArguments(args);
@@ -80,8 +76,11 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mAlarmId = getArguments().getLong(ARG_ALARM_ID);
+        } else {
+            throw new RuntimeException("Expected bundle arguments.");
         }
 
         // Get alarm from database
@@ -91,7 +90,7 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
         mAlarm = alarmList.get(0);
 
         // construct the preferencefragment (internal)
-        addPreferencesFromResource(R.xml.alarm_preferences);
+        addPreferencesFromResource(R.xml.preferences_alarm);
 
         /**
          * Manual connection of the preferences to the database
@@ -113,7 +112,7 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
         });
 
 
-        final MultiSelectListPreference prefRepeat = (MultiSelectListPreference)getPreferenceManager().findPreference("repeat");
+        final ExtMultiSelectListPreference prefRepeat = (ExtMultiSelectListPreference)getPreferenceManager().findPreference("repeat");
         mRepeatDays = mAlarm.getScheduleRepeatDays().fullWords;
         prefRepeat.setValues(mRepeatDays);
         prefRepeat.setSummary(mAlarm.getScheduleRepeatDays().humanReadable);
@@ -162,6 +161,12 @@ public class AlarmPreferencesFragment extends PreferenceFragment {
             }
         });
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override

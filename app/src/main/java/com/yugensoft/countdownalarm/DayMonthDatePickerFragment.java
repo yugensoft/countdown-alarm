@@ -10,10 +10,10 @@ import android.widget.Toast;
 import java.util.Calendar;
 
 
-public class DayMonthDatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class DayMonthDatePickerFragment extends DialogFragment implements DayMonthDatePickerDialog.OnDateSetListener {
 
     public static abstract class PickerCallback {
-        public abstract void callback(int year, int month, int day);
+        public abstract void callback(int month, int day);
     }
     private PickerCallback mPickerCallback;
     public void setPickerCallback(PickerCallback pickerCallback) {
@@ -37,17 +37,20 @@ public class DayMonthDatePickerFragment extends DialogFragment implements DatePi
         int year = c.get(Calendar.YEAR);
 
         // Create a new instance of TimePickerDialog and return it
-        return new DayMonthDatePickerDialog(getActivity(), this, year, month, day);
+        DayMonthDatePickerDialog dialog = new DayMonthDatePickerDialog(getActivity(), month, day);
+        dialog.setTitle("Set date");
+        dialog.setDateSetListener(this);
+        return dialog;
 
     }
 
     @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-        int monthOneBased = month + 1; // The Calender/DatePickerDialog starts months at 0, but the TimeDate classes start at 1
+    public void onDateSet(int month, int dayOfMonth) {
+        int monthOneBased = month + 1; // The Calender starts months at 0, but the TimeDate classes start at 1
 
         // Call the callbackSet function, to cause a notifySetDataChanged back in the activity
         if(mPickerCallback !=null) {
-            mPickerCallback.callback(year, monthOneBased, dayOfMonth);
+            mPickerCallback.callback(monthOneBased, dayOfMonth);
         } else {
             throw new RuntimeException("Callback must be set");
         }

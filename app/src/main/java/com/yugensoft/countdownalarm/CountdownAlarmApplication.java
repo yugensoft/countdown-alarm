@@ -11,12 +11,29 @@ public class CountdownAlarmApplication extends Application {
     private Tracker mTracker;
     private DaoSession daoSession;
 
+    // Application flavour (for different 'levels' of the application, i.e. free or paid)
+    public enum e_ApplicationFlavour {
+        FREE(0),
+        PREMIUM(1);
+
+        private int value;
+        private e_ApplicationFlavour(int value){
+            this.value = value;
+        }
+        public int getValue(){
+            return value;
+        }
+    }
+    private e_ApplicationFlavour mApplicationFlavour;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // todo says should only be used in development, because drops tables on upgrade, ???
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "countdown-alarm-db");
+        mApplicationFlavour = e_ApplicationFlavour.FREE;
+
+        // todo change to a custome OpenHelper, as this one drops tables on upgrade
+        DaoMaster.OpenHelper helper = new CountdownAlarmDbOpenHelper(this, "countdown-alarm-db");
         Database db = helper.getWritableDb();
         daoSession = new DaoMaster(db).newSession();
     }

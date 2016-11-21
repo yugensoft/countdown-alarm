@@ -34,10 +34,10 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".AlarmPlayerIntentService"/>
+        <service android:name=".AlarmPlayerIntentService" />
 
         <activity android:name=".AlarmReceiverActivity" />
-
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

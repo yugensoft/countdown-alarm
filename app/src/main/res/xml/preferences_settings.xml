@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/snooze"
+        android:key="pref_snooze"
+        >
+        <com.yugensoft.countdownalarm.NumberPickerPreference
+            android:key="@string/pref_snooze_duration"
+            android:title="@string/snooze_duration"
+            android:defaultValue="@integer/def_snooze_duration"
+            />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

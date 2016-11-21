@@ -39,6 +39,7 @@ public class MessageActivity extends AppCompatActivity {
 
     private EditText editMessage;
 
+    // loaded from intent
     private Long mMessageId;
 
     /**

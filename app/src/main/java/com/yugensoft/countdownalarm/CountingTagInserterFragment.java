@@ -16,6 +16,8 @@ import android.widget.Toast;
 import org.joda.time.DateTime;
 import org.joda.time.Months;
 
+import java.util.Calendar;
+
 /**
  * Created by yugensoft on 4/11/2016.
  */
@@ -109,8 +111,9 @@ public class CountingTagInserterFragment extends TagInserterFragment {
             public void onClick(View v) {
                 DayMonthDatePickerFragment fragment = DayMonthDatePickerFragment.newInstance(new DayMonthDatePickerFragment.PickerCallback(){
                     @Override
-                    public void callback(int year, int month, int day) {
-                        DateTime dt = new DateTime(year, month, day, 0, 0);
+                    public void callback(int month, int day) {
+                        int thisYear = Calendar.getInstance().get(Calendar.YEAR);
+                        DateTime dt = new DateTime(thisYear, month, day, 0, 0);
                         mCompareDate = dt.toString(COMPARE_DATE_STORAGE_FORMAT);
                         mComparisonDateText.setText(dt.toString("MMM dd"));
                         // fill radiobuttons with text
@@ -123,6 +126,7 @@ public class CountingTagInserterFragment extends TagInserterFragment {
                     }
                 });
                 fragment.show(getActivity().getFragmentManager(),"day-month-date-picker");
+
             }
         });
 

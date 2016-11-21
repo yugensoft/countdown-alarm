@@ -1,12 +1,9 @@
 package com.yugensoft.countdownalarm;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,10 +11,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.joda.time.DateTime;
 
-import java.io.IOException;
+import java.util.Date;
 
 public class AlarmReceiverActivity extends AppCompatActivity {
     public static final String KEY_ALARM_ID = "alarm-id";
@@ -25,22 +23,33 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_ALARM_TIME = "alarm-time";
     public static final String KEY_VIBRATE = "vibrate";
+    public static final String KEY_TRIGGERED_TIME = "trig-time";
+    public static final String KEY_SNOOZE_DURATION = "snooze-dur";
 
     private TextView mTextTime;
 
+    // loaded from intent
     private long mAlarmId;
     private String mRingtoneUri;
     private String mAlarmTime;
     private String mMessage;
     private boolean mVibrate;
+    private long mTriggeredTime;
+    private long mSnoozeDuration;
 
     private Intent mAlarmPlayerIntent;
+
+    private AlarmManager mAlarmManager;
+
+    private DaoSession mDaoSession;
 
     public static Intent newIntent(
             Context context,
             long alarmId,
             String ringtoneUri,
             String alarmTime,
+            long triggeredTime,
+            long snoozeDuration,
             boolean vibrate,
             @Nullable String message
     ){
@@ -51,6 +60,8 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         intent.putExtra(KEY_MESSAGE, message);
         intent.putExtra(KEY_ALARM_TIME, alarmTime);
         intent.putExtra(KEY_VIBRATE, vibrate);
+        intent.putExtra(KEY_TRIGGERED_TIME, triggeredTime);
+        intent.putExtra(KEY_SNOOZE_DURATION,snoozeDuration);
         return intent;
     }
 
@@ -62,6 +73,8 @@ public class AlarmReceiverActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_alarm_receiver);
 
+        mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+
         mTextTime = (TextView)findViewById(R.id.text_time);
 
         // load arguments
@@ -71,7 +84,10 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         mMessage = intent.getStringExtra(KEY_MESSAGE);
         mRingtoneUri = intent.getStringExtra(KEY_RINGTONE_URI);
         mVibrate = intent.getBooleanExtra(KEY_VIBRATE, false);
+        mTriggeredTime = intent.getLongExtra(KEY_TRIGGERED_TIME,-1);
+        mSnoozeDuration = intent.getLongExtra(KEY_SNOOZE_DURATION,-1);
 
+        // show the time
         DateTime now = new DateTime();
         String time = AlarmTimeFormatter.convertTimeToReadable(now.getHourOfDay(),now.getMinuteOfHour(),this);
         mTextTime.setText(time);
@@ -79,10 +95,62 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         // Start the alarm player
         mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
         startService(mAlarmPlayerIntent);
+
+        // get the next alarm time and set it
+        mDaoSession = ((CountdownAlarmApplication)getApplication()).getDaoSession();
+        Alarm alarm = mDaoSession.getAlarmDao().loadByRowId(mAlarmId);
+        Integer repeats = alarm.getRepeats();
+        if(repeats == null){
+            // ongoing repeating alarm, just re-engage it
+            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
+
+        } else if (repeats > 1) { // stub: fixed-repeats alarms not yet implemented
+            // fixed repeats alarm, re-engage it and update it in db
+            repeats--;
+            alarm.setRepeats(repeats);
+            alarm.setActive(true); // should be anyway, but affirm
+            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
+            mDaoSession.insertOrReplace(alarm);
+
+        } else if (repeats == 1) {
+            // no-repeat alarm, deactivate and disengage it
+            alarm.setRepeats(0);
+            alarm.setActive(false);
+            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
+            mDaoSession.insertOrReplace(alarm);
+        }
+
     }
 
+    /**
+     * Set of a new alarm pendingIntent back to this activity with the snooze delay added
+     * Then dismiss.
+     * @param view
+     */
     public void snoozeAlarm(@Nullable View view) {
-        // todo: set off a new pendingintent back to this activity
+        long snoozedAlarmTime = mTriggeredTime + mSnoozeDuration;
+
+        PendingIntent alarmIntent = PendingIntent.getActivity(
+                this,
+                Long.valueOf(mAlarmId).intValue(),
+                AlarmReceiverActivity.newIntent(
+                        this,
+                        mAlarmId,
+                        mRingtoneUri,
+                        mAlarmTime,
+                        snoozedAlarmTime,
+                        mSnoozeDuration,
+                        mVibrate,
+                        mMessage
+                ),
+                PendingIntent.FLAG_CANCEL_CURRENT
+        );
+
+        mAlarmManager.set(AlarmManager.RTC_WAKEUP, snoozedAlarmTime, alarmIntent);
+
+        Toast.makeText(this, "Snoozing...", Toast.LENGTH_SHORT).show();
+
+        dismissAlarm(null);
     }
 
     public void dismissAlarm(@Nullable View view) {

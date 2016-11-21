@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.RingtoneManager;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.Tracker;
 
 import org.joda.time.DateTime;
@@ -37,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private AlarmListAdapter alarmListAdapter;
     private ListView alarmListView;
+    private AdView mAdView;
 
     private Date mNextAlarm = null;
 
@@ -65,8 +70,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 //        engageAllAlarms(); //todo
+
+        // The ad
+        mAdView = (AdView) findViewById(R.id.adView);
+        // todo: load ad, add more ads on other activities
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.mi_settings:
+                startActivity(new Intent(this,SettingsActivity.class));
+                return true;
+            default:
+                return false;
+        }
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -79,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             if(resultCode == AlarmActivity.RES_SAVED) {
                 alarmListAdapter.updateAlarms();
                 long alarmId = data.getLongExtra(AlarmActivity.KEY_ALARM_ID,-1);
-                engageAlarm(mDaoSession.getAlarmDao().loadByRowId(alarmId));
+                AlarmFunctions.engageAlarm(mDaoSession.getAlarmDao().loadByRowId(alarmId),this,mDaoSession,mAlarmManager);
             }
         }
     }
@@ -104,61 +129,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         firstAlarm.setRepeats(1);
         firstAlarm.setActive(true);
         mDaoSession.getAlarmDao().update(firstAlarm);
-        engageAlarm(firstAlarm);
+        AlarmFunctions.engageAlarm(firstAlarm,this,mDaoSession,mAlarmManager);
         alarmListAdapter.updateAlarms();
     }
 
-    /**
-     * Engage all active alarms, i.e. all active alarms get loaded into the AlarmManager ready to trigger
-     * Does not disengage inactive alarms.
-     * Assumes it is being called on application start or by the Boot Receiver
-     */
-    public void engageAllAlarms(){
-        List<Alarm> alarms = mDaoSession.getAlarmDao().queryBuilder()
-                .where(AlarmDao.Properties.Active.eq(true))
-                .list();
-        for (Alarm alarm : alarms){
-            engageAlarm(alarm);
-        }
-    }
 
-    /**
-     * Engage/disengage the given alarm based on active status
-     */
-    public void engageAlarm(Alarm alarm){
-        if(alarm.getId() == null){
-            throw new IllegalArgumentException("Attempt to engage invalid alarm");
-        }
-        if(alarm.getId() > Integer.MAX_VALUE){
-            throw new RuntimeException("Design failure, alarm ID exceeded integer maximum");
-        }
-
-        String message;
-        if(alarm.getMessageId() == null) {
-            message = null;
-        } else {
-            message = MessageActivity.renderTaggedText(alarm.getMessage().getText(),mDaoSession.getTagDao(),this).toString();
-        }
-        PendingIntent alarmIntent = PendingIntent.getActivity(
-                this,
-                alarm.getId().intValue(),
-                AlarmReceiverActivity.newIntent(
-                        this,
-                        alarm.getId(),
-                        alarm.getRingtone(),
-                        alarm.getScheduleAlarmTime(this).humanReadable,
-                        alarm.getVibrate(),
-                        message
-                ),
-                PendingIntent.FLAG_CANCEL_CURRENT
-        );
-
-        if(alarm.getActive()) {
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, alarm.getNextAlarmTime().getTime(), alarmIntent);
-        } else {
-            mAlarmManager.cancel(alarmIntent);
-        }
-    }
 
     /**
      * Enables the boot receiver, which restores the AlarmManager alarms
