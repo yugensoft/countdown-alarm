@@ -12,6 +12,7 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -29,7 +30,7 @@ import java.util.Set;
  * create an instance of this fragment.
  */
 public class AlarmPreferenceFragment extends PreferenceFragment {
-    private static final String TAG = "alarm-pref-fragment";
+    private static final String TAG = "app-debug";
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_ALARM_ID = "alarm-id";
@@ -86,8 +87,7 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         // Get alarm from database
         daoSession = ((CountdownAlarmApplication)getActivity().getApplication()).getDaoSession();
         AlarmDao alarmDao = daoSession.getAlarmDao();
-        List<Alarm> alarmList = alarmDao.queryBuilder().where(AlarmDao.Properties.Id.eq(mAlarmId)).list();
-        mAlarm = alarmList.get(0);
+        mAlarm = alarmDao.loadByRowId(mAlarmId);
 
         // construct the preferencefragment (internal)
         addPreferencesFromResource(R.xml.preferences_alarm);
@@ -256,7 +256,6 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
@@ -274,7 +273,9 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         // assume on save that the alarm is to be activated too
         mAlarm.setActive(true);
         // save it
-        daoSession.insertOrReplace(mAlarm);
+        mAlarm.update();
+
+        Log.d(TAG, "saveAlarm: " + String.valueOf(mAlarm.getId()));
 
         AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity());
     }

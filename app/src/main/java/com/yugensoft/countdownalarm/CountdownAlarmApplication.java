@@ -32,7 +32,6 @@ public class CountdownAlarmApplication extends Application {
 
         mApplicationFlavour = e_ApplicationFlavour.FREE;
 
-        // todo change to a custome OpenHelper, as this one drops tables on upgrade
         DaoMaster.OpenHelper helper = new CountdownAlarmDbOpenHelper(this, "countdown-alarm-db");
         Database db = helper.getWritableDb();
         daoSession = new DaoMaster(db).newSession();

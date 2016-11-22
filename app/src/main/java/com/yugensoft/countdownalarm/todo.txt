@@ -1,27 +1,31 @@
 TODO:
-
-Alarm functionality:
-- test re-set repeating alarms
-- sync up checkbox-db-alarmIntents
-- add the bootreceiver stuff
-- make main-activity reload adapter whenever alarm-receiver finishes and focus goes back to former
-
 Others:
 make layout and buttons look decent
-- colours
-- landscape orientations
+- colours & shading, borders etc
 async stuff to speed up loading
 orientation test all pages
 - check scroll when page overflow
+- fix count-d/u saveInstance
+-
 ads
 cleanup bugs and to-dos
-make some 'espresso tests'
 add terms-of-use agreement start
+
+Check
+- behaviour on close or identical alarms
+-
+
+Testing:
+make some 'espresso tests'
+
+Test-list:
+-
 
 -- revisit --
 the TTS engine needs to be checked for an installed before the app can be used.
 
 -- before publish --
+remove all logd
 add all tracking
 
 =next revision todo=

@@ -3,6 +3,7 @@ package com.yugensoft.countdownalarm;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 
 import java.util.List;
 
@@ -43,22 +44,28 @@ public class AlarmFunctions {
             message = MessageActivity.renderTaggedText(alarm.getMessage().getText(), daoSession.getTagDao(),context).toString();
         }
         long triggerTime = alarm.getNextAlarmTime().getTime();
+
+        // Create the pending intent
+        Intent intent = AlarmReceiverActivity.newIntent(
+                context,
+                alarm.getId(),
+                alarm.getRingtone(),
+                alarm.getScheduleAlarmTime(context).humanReadable,
+                triggerTime,
+                snoozeDuration,
+                alarm.getVibrate(),
+                false,
+                message
+        );
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent alarmIntent = PendingIntent.getActivity(
                 context,
                 alarm.getId().intValue(),
-                AlarmReceiverActivity.newIntent(
-                        context,
-                        alarm.getId(),
-                        alarm.getRingtone(),
-                        alarm.getScheduleAlarmTime(context).humanReadable,
-                        triggerTime,
-                        snoozeDuration,
-                        alarm.getVibrate(),
-                        message
-                ),
+                intent,
                 PendingIntent.FLAG_CANCEL_CURRENT
         );
 
+        // Set or cancel the alarm depending on Active status
         if(alarm.getActive()) {
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, alarmIntent);
         } else {

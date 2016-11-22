@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +34,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+    private static final String TAG = "app-debug";
     private static int REQ_ALARM_ACTIVITY = 0;
 
     private Tracker mTracker;
@@ -66,14 +68,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         alarmListView.setAdapter(alarmListAdapter);
         alarmListView.setOnItemClickListener(this);
-        alarmListAdapter.updateAlarms();
 
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-//        engageAllAlarms(); //todo
+        AlarmFunctions.engageAllAlarms(this,mDaoSession,mAlarmManager);
 
         // The ad
         mAdView = (AdView) findViewById(R.id.adView);
         // todo: load ad, add more ads on other activities
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // ensure alarms list is up to date
+        alarmListAdapter.updateAlarms();
     }
 
     @Override
@@ -102,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQ_ALARM_ACTIVITY){
             if(resultCode == AlarmActivity.RES_SAVED) {
-                alarmListAdapter.updateAlarms();
                 long alarmId = data.getLongExtra(AlarmActivity.KEY_ALARM_ID,-1);
                 AlarmFunctions.engageAlarm(mDaoSession.getAlarmDao().loadByRowId(alarmId),this,mDaoSession,mAlarmManager);
             }
@@ -115,7 +123,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     public void addAlarm(@Nullable View view) {
         Alarm alarm = Alarm.newDefaultAlarm();
-        Long alarmId = mDaoSession.getAlarmDao().insertOrReplace(alarm);
+        Long alarmId = mDaoSession.getAlarmDao().insert(alarm);
+        Log.d(TAG, "addAlarm: " + String.valueOf(alarmId));
         startActivityForResult(AlarmActivity.newIntent(this, alarmId), REQ_ALARM_ACTIVITY);
     }
 
@@ -158,5 +167,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
+    }
+
+    //temp
+    public void reloadAlarms(View view) {
+        alarmListAdapter.updateAlarms();
     }
 }

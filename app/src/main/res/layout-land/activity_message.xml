@@ -9,24 +9,108 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yugensoft.countdownalarm.MessageActivity">
 
-    <EditText
+    <LinearLayout
+        android:id="@+id/ll_buttonbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/edit_message"
+        android:orientation="horizontal"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:inputType="textVisiblePassword|textMultiLine"
+        style="?android:attr/buttonBarStyle"
+        >
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:id="@+id/button_cancel"
+            android:onClick="cancelMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            android:id="@+id/button_save"
+            android:onClick="saveMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/preview"
+            android:id="@+id/button_preview"
+            android:onClick="previewMessage"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+    </LinearLayout>
 
-        />
-
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Preview"
-        android:id="@+id/button_preview"
-        android:onClick="previewMessage"
-        android:layout_below="@+id/edit_message"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/ll_buttonbar"
+        android:orientation="horizontal"
+        >
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/edit_message"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:inputType="textVisiblePassword|textMultiLine"
+            />
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            >
+        <LinearLayout
+            android:id="@+id/ll_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/insert_tags"
+                android:id="@+id/text_insert_tags"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/todays_date"
+                android:id="@+id/button_tag_date"
+                android:onClick="insertTagDate"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/button_tag_countdown"
+                android:id="@+id/button_tag_countdown"
+                android:onClick="insertTagCountdown"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/button_tag_countup"
+                android:id="@+id/button_tag_countup"
+                android:onClick="insertTagCountup"
+                />
+        </LinearLayout>
+        </ScrollView>
+
+
+    </LinearLayout>
+
+
+
+
 </RelativeLayout>

@@ -13,7 +13,7 @@ import android.view.View;
 import butterknife.ButterKnife;
 
 public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceFragment.OnFragmentInteractionListener{
-    public static String KEY_ALARM_ID = "alarm-id";
+    public static String KEY_ALARM_ID = "app-debug";
 
     public static int RES_CANCELED = 0;
     public static int RES_SAVED = 1;

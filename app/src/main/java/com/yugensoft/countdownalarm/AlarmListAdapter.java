@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.PopupMenu;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,7 +39,7 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 
 public class AlarmListAdapter extends BaseAdapter {
-    private static String TAG = "adapter";
+    private static String TAG = "app-debug";
 
     private Activity mActivity;
     private LayoutInflater mInflater;
@@ -102,12 +103,14 @@ public class AlarmListAdapter extends BaseAdapter {
          * populate data & setup controls
          */
         // checkbox to activate
+        wActive.setOnCheckedChangeListener(null);
         wActive.setChecked(alarm.getActive());
         wActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.d(TAG, "onCheckedChanged: " + String.valueOf(alarm.getId()) + "," + String.valueOf(isChecked));
                 alarm.setActive(isChecked);
-                mDaoSession.insertOrReplace(alarm);
+                alarm.update();
                 AlarmFunctions.engageAlarm(
                         alarm,
                         mActivity,
@@ -133,10 +136,10 @@ public class AlarmListAdapter extends BaseAdapter {
                     public boolean onMenuItemClick(MenuItem item) {
                         switch(item.getItemId()){
                             case R.id.mi_preview:
-                                previewAlarm(alarmId);
+                                previewAlarm(alarm);
                                 return true;
                             case R.id.mi_delete:
-                                deleteAlarm(alarmId);
+                                deleteAlarm(alarm);
                                 return true;
                             default:
                                 return false;
@@ -164,9 +167,8 @@ public class AlarmListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void deleteAlarm(long alarmId) {
+    private void deleteAlarm(Alarm alarm) {
         // first deactivate it and disengage it
-        Alarm alarm = mDaoSession.getAlarmDao().load(alarmId);
         alarm.setActive(false);
         AlarmFunctions.engageAlarm(
                 alarm,
@@ -175,16 +177,16 @@ public class AlarmListAdapter extends BaseAdapter {
                 (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
         );
         // delete it
+        Log.d(TAG, "deleteAlarm: " + String.valueOf(alarm.getId()));
         mDaoSession.getAlarmDao().delete(alarm);
         updateAlarms();
     }
 
-    private void previewAlarm(long alarmId) {
+    private void previewAlarm(Alarm alarm) {
         // get snooze details
         long snoozeDuration = SettingsActivity.getSnoozeDurationInMs(mActivity);
 
         // get alarm and pass details to alarm-reciever
-        Alarm alarm = mDaoSession.getAlarmDao().load(alarmId);
         String message;
         if(alarm.getMessageId() == null) {
             message = null;
@@ -197,14 +199,16 @@ public class AlarmListAdapter extends BaseAdapter {
         }
         Intent intent = AlarmReceiverActivity.newIntent(
                 mActivity,
-                alarmId,
+                alarm.getId(),
                 alarm.getRingtone(),
                 alarm.getScheduleAlarmTime(mActivity).humanReadable,
                 new Date().getTime(),
                 snoozeDuration,
                 alarm.getVibrate(),
+                true,
                 message
         );
+
         mActivity.startActivity(intent);
     }
 
@@ -218,6 +222,7 @@ public class AlarmListAdapter extends BaseAdapter {
      * - update the views
      */
     public void updateAlarms(){
+        mDaoSession.clear();
         Query alarmQuery = mDaoSession.getAlarmDao().queryBuilder().build();
         AsyncSession asyncSession = mDaoSession.startAsyncSession();
 

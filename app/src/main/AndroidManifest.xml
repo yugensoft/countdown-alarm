@@ -28,7 +28,7 @@
 
         <receiver
             android:name=".BootBroadcastReceiver"
-            android:enabled="false">
+            android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -36,8 +36,13 @@
 
         <service android:name=".AlarmPlayerIntentService" />
 
-        <activity android:name=".AlarmReceiverActivity" />
-        <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".AlarmReceiverActivity"
+            android:excludeFromRecents="true"
+            android:taskAffinity=".AlarmReceiverActivity"
+            />
+
+
+        <activity android:name=".SettingsActivity"/>
     </application>
 
 </manifest>

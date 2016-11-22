@@ -25,6 +25,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     public static final String KEY_VIBRATE = "vibrate";
     public static final String KEY_TRIGGERED_TIME = "trig-time";
     public static final String KEY_SNOOZE_DURATION = "snooze-dur";
+    public static final String KEY_PREVIEW = "preview";
 
     private TextView mTextTime;
 
@@ -36,6 +37,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     private boolean mVibrate;
     private long mTriggeredTime;
     private long mSnoozeDuration;
+    private boolean mIsPreview;
 
     private Intent mAlarmPlayerIntent;
 
@@ -51,6 +53,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
             long triggeredTime,
             long snoozeDuration,
             boolean vibrate,
+            boolean isPreview,
             @Nullable String message
     ){
         Intent intent = new Intent(context, AlarmReceiverActivity.class);
@@ -62,6 +65,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         intent.putExtra(KEY_VIBRATE, vibrate);
         intent.putExtra(KEY_TRIGGERED_TIME, triggeredTime);
         intent.putExtra(KEY_SNOOZE_DURATION,snoozeDuration);
+        intent.putExtra(KEY_PREVIEW,isPreview);
         return intent;
     }
 
@@ -86,6 +90,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         mVibrate = intent.getBooleanExtra(KEY_VIBRATE, false);
         mTriggeredTime = intent.getLongExtra(KEY_TRIGGERED_TIME,-1);
         mSnoozeDuration = intent.getLongExtra(KEY_SNOOZE_DURATION,-1);
+        mIsPreview = intent.getBooleanExtra(KEY_PREVIEW,false);
 
         // show the time
         DateTime now = new DateTime();
@@ -97,29 +102,30 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         startService(mAlarmPlayerIntent);
 
         // get the next alarm time and set it
-        mDaoSession = ((CountdownAlarmApplication)getApplication()).getDaoSession();
-        Alarm alarm = mDaoSession.getAlarmDao().loadByRowId(mAlarmId);
-        Integer repeats = alarm.getRepeats();
-        if(repeats == null){
-            // ongoing repeating alarm, just re-engage it
-            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
+        if(!mIsPreview) {
+            mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
+            Alarm alarm = mDaoSession.getAlarmDao().loadByRowId(mAlarmId);
+            Integer repeats = alarm.getRepeats();
+            if (repeats == null) {
+                // ongoing repeating alarm, just re-engage it
+                AlarmFunctions.engageAlarm(alarm, this, mDaoSession, mAlarmManager);
 
-        } else if (repeats > 1) { // stub: fixed-repeats alarms not yet implemented
-            // fixed repeats alarm, re-engage it and update it in db
-            repeats--;
-            alarm.setRepeats(repeats);
-            alarm.setActive(true); // should be anyway, but affirm
-            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
-            mDaoSession.insertOrReplace(alarm);
+            } else if (repeats > 1) { // stub: fixed-repeats alarms not yet implemented
+                // fixed repeats alarm, re-engage it and update it in db
+                repeats--;
+                alarm.setRepeats(repeats);
+                alarm.setActive(true); // should be anyway, but affirm
+                AlarmFunctions.engageAlarm(alarm, this, mDaoSession, mAlarmManager);
+                alarm.update();
 
-        } else if (repeats == 1) {
-            // no-repeat alarm, deactivate and disengage it
-            alarm.setRepeats(0);
-            alarm.setActive(false);
-            AlarmFunctions.engageAlarm(alarm,this,mDaoSession,mAlarmManager);
-            mDaoSession.insertOrReplace(alarm);
+            } else if (repeats == 1) {
+                // no-repeat alarm, deactivate and disengage it
+                alarm.setRepeats(0);
+                alarm.setActive(false);
+                AlarmFunctions.engageAlarm(alarm, this, mDaoSession, mAlarmManager);
+                alarm.update();
+            }
         }
-
     }
 
     /**
@@ -130,19 +136,22 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     public void snoozeAlarm(@Nullable View view) {
         long snoozedAlarmTime = mTriggeredTime + mSnoozeDuration;
 
+        Intent intent = AlarmReceiverActivity.newIntent(
+                this,
+                mAlarmId,
+                mRingtoneUri,
+                mAlarmTime,
+                snoozedAlarmTime,
+                mSnoozeDuration,
+                mVibrate,
+                mIsPreview,
+                mMessage
+        );
+
         PendingIntent alarmIntent = PendingIntent.getActivity(
                 this,
                 Long.valueOf(mAlarmId).intValue(),
-                AlarmReceiverActivity.newIntent(
-                        this,
-                        mAlarmId,
-                        mRingtoneUri,
-                        mAlarmTime,
-                        snoozedAlarmTime,
-                        mSnoozeDuration,
-                        mVibrate,
-                        mMessage
-                ),
+                intent,
                 PendingIntent.FLAG_CANCEL_CURRENT
         );
 
