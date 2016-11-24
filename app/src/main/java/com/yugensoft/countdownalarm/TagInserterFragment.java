@@ -31,14 +31,18 @@ public class TagInserterFragment extends DialogFragment {
 
     protected static final String COMPARE_DATE_STORAGE_FORMAT = "MM dd";
 
+    private static final String KEY_COMPARE_DATE = "com-date";
+    private static final String KEY_SPEECH_FORMAT = "speech-format";
+
 
     protected View mFragmentView;
     protected int mCursorPos;
     protected long mMessageId;
 
-    protected Tag.TagType mTagType;
-    protected String mCompareDate;
-    protected String mSpeechFormat;
+    // state data
+    protected Tag.TagType mTagType; // always constructed by child onCreates() from the bundle
+    protected String mCompareDate; // to save
+    protected String mSpeechFormat; // to save
 
     @NonNull
     @Override
@@ -232,9 +236,27 @@ public class TagInserterFragment extends DialogFragment {
             padSpaceRight = new SpannableStringBuilder("");
         }
         editMessage.setText(TextUtils.concat(before,padSpaceLeft,newSpan,padSpaceRight,after));
-        editMessage.setSelection(mCursorPos + tagRendering.length() + padSpaceRight.length());
+        editMessage.setSelection(editMessage.length());
 
         dismiss();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(KEY_COMPARE_DATE,mCompareDate);
+        outState.putString(KEY_SPEECH_FORMAT,mSpeechFormat);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Function to restore state data
+     */
+    protected void restoreStateData(@Nullable Bundle savedInstanceState){
+        if(savedInstanceState != null){
+            mCompareDate=savedInstanceState.getString(KEY_COMPARE_DATE);
+            mSpeechFormat=savedInstanceState.getString(KEY_SPEECH_FORMAT);
+        }
+
+    }
 }

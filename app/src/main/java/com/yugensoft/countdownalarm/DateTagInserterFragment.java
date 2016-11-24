@@ -41,6 +41,8 @@ public class DateTagInserterFragment extends TagInserterFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // restore state data
+        restoreStateData(savedInstanceState);
         // layouts and widgets
         mFragmentView = inflater.inflate(R.layout.fragment_date_tag_inserter, container, false);
         mCancelButton=(Button)mFragmentView.findViewById(R.id.button_ti_cancel);

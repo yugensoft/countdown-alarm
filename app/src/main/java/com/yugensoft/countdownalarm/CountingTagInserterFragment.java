@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import org.joda.time.DateTime;
 import org.joda.time.Months;
+import org.joda.time.format.DateTimeFormat;
 
 import java.util.Calendar;
 
@@ -33,6 +34,7 @@ public class CountingTagInserterFragment extends TagInserterFragment {
     private RadioGroup mRadioGroup;
     private TextView mComparisonDateLabel;
     private TextView mComparisonDateText;
+    private DayMonthDatePickerFragment datePickerFragment;
 
     public static CountingTagInserterFragment newInstance(int cursorPos, long messageId, CountingDirection countingDirection) {
         CountingTagInserterFragment f = new CountingTagInserterFragment();
@@ -60,6 +62,8 @@ public class CountingTagInserterFragment extends TagInserterFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // restore state data
+        restoreStateData(savedInstanceState);
         // layouts and widgets
         mFragmentView = inflater.inflate(R.layout.fragment_counting_tag_inserter, container, false);
         mCancelButton=(Button)mFragmentView.findViewById(R.id.button_ti_cancel);
@@ -109,27 +113,55 @@ public class CountingTagInserterFragment extends TagInserterFragment {
         mComparisonDateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DayMonthDatePickerFragment fragment = DayMonthDatePickerFragment.newInstance(new DayMonthDatePickerFragment.PickerCallback(){
+                datePickerFragment = DayMonthDatePickerFragment.newInstance(new DayMonthDatePickerFragment.PickerCallback(){
                     @Override
                     public void callback(int month, int day) {
                         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
                         DateTime dt = new DateTime(thisYear, month, day, 0, 0);
                         mCompareDate = dt.toString(COMPARE_DATE_STORAGE_FORMAT);
-                        mComparisonDateText.setText(dt.toString("MMM dd"));
-                        // fill radiobuttons with text
-                        mComparisonDateLabel.setVisibility(View.VISIBLE);
-                        mRadioGroup.setVisibility(View.VISIBLE);
-                        for (int i = 0; i < mRadioGroup.getChildCount(); i++){
-                            RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
-                            rb.setText(renderTag(mTagType,rb.getTag().toString(),mCompareDate,true));
-                       }
+                        renderRadioButtonLabels();
                     }
                 });
-                fragment.show(getActivity().getFragmentManager(),"day-month-date-picker");
+                datePickerFragment.show(getActivity().getFragmentManager(),"day-month-date-picker");
 
             }
         });
 
+        // Give the radiobuttons labels if compare date already set (i.e. on orientation change)
+        renderRadioButtonLabels();
+
         return mFragmentView;
+    }
+
+    /**
+     * Function to fill in the radiobutton labels based on the compare date
+     */
+    private void renderRadioButtonLabels() {
+        if(mCompareDate == null){
+            return;
+        }
+
+        DateTime dt = DateTime.parse(mCompareDate, DateTimeFormat.forPattern(COMPARE_DATE_STORAGE_FORMAT));
+
+        mComparisonDateText.setText(dt.toString("MMM dd"));
+        // fill radiobuttons with text
+        mComparisonDateLabel.setVisibility(View.VISIBLE);
+        mRadioGroup.setVisibility(View.VISIBLE);
+        for (int i = 0; i < mRadioGroup.getChildCount(); i++){
+            RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
+            rb.setText(renderTag(mTagType,rb.getTag().toString(),mCompareDate,true));
+        }
+    }
+
+    /**
+     * Make sure any child dialogs are killed, to prevent orphaning problems
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if(datePickerFragment != null){
+            datePickerFragment.dismiss();
+        }
     }
 }
