@@ -10,6 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import butterknife.ButterKnife;
 
 public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceFragment.OnFragmentInteractionListener{
@@ -24,6 +27,14 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceF
     // main fragment
     private AlarmPreferenceFragment mFragment;
 
+    private Tracker mTracker;
+
+    /**
+     * Create a new intent for starting this activity
+     * @param context
+     * @param id Alarm id. If -1, a new alarm will be created.
+     * @return
+     */
     public static Intent newIntent(Context context, long id){
         Intent intent = new Intent(context,AlarmActivity.class);
         intent.putExtra(AlarmActivity.KEY_ALARM_ID,id);
@@ -46,7 +57,18 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceF
         fragmentTransaction.add(R.id.ll_fragment,mFragment);
         fragmentTransaction.commit();
 
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     public void cancelAlarm(@Nullable View view) {
@@ -55,10 +77,10 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceF
     }
 
     public void saveAlarm(@Nullable View view) {
-        mFragment.saveAlarm();
+        long finalAlarmId = mFragment.saveAlarm();
 
         Intent data = new Intent();
-        data.putExtra(KEY_ALARM_ID,mAlarmId);
+        data.putExtra(KEY_ALARM_ID,finalAlarmId);
         setResult(RES_SAVED,data);
         finish();
     }
@@ -67,4 +89,6 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceF
     public void onFragmentInteraction(Uri uri) {
         // not used
     }
+
+
 }

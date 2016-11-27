@@ -108,7 +108,6 @@ public class AlarmListAdapter extends BaseAdapter {
         wActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.d(TAG, "onCheckedChanged: " + String.valueOf(alarm.getId()) + "," + String.valueOf(isChecked));
                 alarm.setActive(isChecked);
                 alarm.update();
                 AlarmFunctions.engageAlarm(
@@ -177,7 +176,6 @@ public class AlarmListAdapter extends BaseAdapter {
                 (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
         );
         // delete it
-        Log.d(TAG, "deleteAlarm: " + String.valueOf(alarm.getId()));
         mDaoSession.getAlarmDao().delete(alarm);
         updateAlarms();
     }

@@ -27,4 +27,6 @@
     <color name="countup_tag_foreground_color">@color/white</color>
     <color name="countdown_tag_background_color">@color/green</color>
     <color name="countdown_tag_foreground_color">@color/white</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

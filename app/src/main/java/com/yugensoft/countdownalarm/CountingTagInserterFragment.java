@@ -13,6 +13,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import org.joda.time.DateTime;
 import org.joda.time.Months;
 import org.joda.time.format.DateTimeFormat;
@@ -35,6 +38,8 @@ public class CountingTagInserterFragment extends TagInserterFragment {
     private TextView mComparisonDateLabel;
     private TextView mComparisonDateText;
     private DayMonthDatePickerFragment datePickerFragment;
+
+
 
     public static CountingTagInserterFragment newInstance(int cursorPos, long messageId, CountingDirection countingDirection) {
         CountingTagInserterFragment f = new CountingTagInserterFragment();
@@ -163,5 +168,14 @@ public class CountingTagInserterFragment extends TagInserterFragment {
         if(datePickerFragment != null){
             datePickerFragment.dismiss();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

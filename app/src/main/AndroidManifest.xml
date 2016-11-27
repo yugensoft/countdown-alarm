@@ -36,13 +36,17 @@
 
         <service android:name=".AlarmPlayerIntentService" />
 
-        <activity android:name=".AlarmReceiverActivity"
+        <activity
+            android:name=".AlarmReceiverActivity"
             android:excludeFromRecents="true"
-            android:taskAffinity=".AlarmReceiverActivity"
-            />
-
-
-        <activity android:name=".SettingsActivity"/>
+            android:taskAffinity=".AlarmReceiverActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity
+            android:name=".LicenseAgreementActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_license_agreement"
+            android:theme="@style/FullscreenTheme" />
+        <activity android:name=".EulaActivity"></activity>
     </application>
 
 </manifest>

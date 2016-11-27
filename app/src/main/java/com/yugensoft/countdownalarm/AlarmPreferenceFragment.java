@@ -87,7 +87,13 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         // Get alarm from database
         daoSession = ((CountdownAlarmApplication)getActivity().getApplication()).getDaoSession();
         AlarmDao alarmDao = daoSession.getAlarmDao();
-        mAlarm = alarmDao.loadByRowId(mAlarmId);
+        if(mAlarmId == -1L){
+            // Add a new alarm
+            mAlarm = Alarm.newDefaultAlarm();
+        } else {
+            // Get existing alarm
+            mAlarm = alarmDao.loadByRowId(mAlarmId);
+        }
 
         // construct the preferencefragment (internal)
         addPreferencesFromResource(R.xml.preferences_alarm);
@@ -221,7 +227,6 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         return ringtone.getTitle(getActivity());
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -269,15 +274,25 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
 
     }
 
-    public void saveAlarm(){
+    /**
+     * Method to save Alarm to db
+     * @return Alarm ID.
+     */
+    public long saveAlarm(){
         // assume on save that the alarm is to be activated too
         mAlarm.setActive(true);
-        // save it
-        mAlarm.update();
 
-        Log.d(TAG, "saveAlarm: " + String.valueOf(mAlarm.getId()));
+        // insert in case of new alarm
+        if(mAlarmId == -1L){
+            mAlarmId = daoSession.getAlarmDao().insert(mAlarm);
+        } else {
+            // save it if exists
+            mAlarm.update();
+        }
 
         AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity());
+
+        return mAlarmId;
     }
 
 

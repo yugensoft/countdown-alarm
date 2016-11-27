@@ -66,8 +66,13 @@ public class AlarmPlayerIntentService extends IntentService {
             public void onInit(int status) {
                 // check for successful instantiation
                 if (status == TextToSpeech.SUCCESS) {
-                    if (mTts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) // todo: always 'US'?
+                    if (mTts.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_AVAILABLE) {
+                        mTts.setLanguage(Locale.getDefault());
+                    } else if (mTts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
                         mTts.setLanguage(Locale.US);
+                    } else {
+                        // should be impossible, but let it try and continue anyway
+                    }
                 } else if (status == TextToSpeech.ERROR) {
                     throw new RuntimeException("Text-to-speech failed.");
                 }

@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.util.Calendar;
 
 
 public class DayMonthDatePickerFragment extends DialogFragment implements DayMonthDatePickerDialog.OnDateSetListener {
+    private Tracker mTracker;
 
     public static abstract class PickerCallback {
         public abstract void callback(int month, int day);
@@ -26,6 +30,13 @@ public class DayMonthDatePickerFragment extends DialogFragment implements DayMon
         fragment.setPickerCallback(pickerCallback);
         return fragment;
 
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getActivity().getApplication()).getDefaultTracker();
     }
 
     @Override
@@ -60,5 +71,14 @@ public class DayMonthDatePickerFragment extends DialogFragment implements DayMon
                 "Date Updated",
                 Toast.LENGTH_LONG
         ).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

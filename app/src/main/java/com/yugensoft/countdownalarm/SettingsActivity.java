@@ -6,7 +6,11 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 public class SettingsActivity extends AppCompatActivity {
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +21,8 @@ public class SettingsActivity extends AppCompatActivity {
                 .replace(android.R.id.content, new SettingsPreferenceFragment())
                 .commit();
 
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
     }
 
     public static long getSnoozeDuration(Context context) {
@@ -27,5 +33,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
     public static long getSnoozeDurationInMs(Context context) {
         return getSnoozeDuration(context) * 60 * 1000;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

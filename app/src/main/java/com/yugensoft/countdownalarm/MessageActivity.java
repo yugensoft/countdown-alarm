@@ -15,7 +15,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,6 @@ import java.util.regex.Pattern;
 
 public class MessageActivity extends AppCompatActivity {
 
-    private static final int MY_DATA_CHECK_CODE = 0;
     public TextToSpeech tts;
 
     private static final String TAG = "message-activity";
@@ -41,6 +42,8 @@ public class MessageActivity extends AppCompatActivity {
 
     // loaded from intent
     private Long mMessageId;
+
+    private Tracker mTracker;
 
     /**
      * Get a new intent for starting this activity
@@ -87,6 +90,25 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
+        // create the TTS
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                // check for successful instantiation
+                if (status == TextToSpeech.SUCCESS) {
+                    if (tts.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_AVAILABLE) {
+                        tts.setLanguage(Locale.getDefault());
+                    } else if (tts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
+                        tts.setLanguage(Locale.US);
+                    } else {
+                        // should be impossible, but let it try and continue anyway
+                    }
+                } else if (status == TextToSpeech.ERROR) {
+                    throw new RuntimeException("Text-to-speech failed.");
+                }
+            }
+        });
+
         // Set up the message edittext
         editMessage = (EditText) findViewById(R.id.edit_message);
         editMessage.addTextChangedListener(messageTextWatcher);
@@ -116,12 +138,8 @@ public class MessageActivity extends AppCompatActivity {
         SpannableStringBuilder messageText = renderTaggedText(taggedText, daoSession.getTagDao(), this);
         editMessage.setText(messageText);
 
-        // check for TTS data // todo: should be done higher up
-        Intent checkTTSIntent = new Intent();
-        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
-
-
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
     }
 
     public static SpannableStringBuilder renderTaggedText(String text, TagDao tagDao, Context context) {
@@ -163,40 +181,6 @@ public class MessageActivity extends AppCompatActivity {
         return spannable;
     }
 
-    /**
-     * Handle the results from the recognition activity.
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == MY_DATA_CHECK_CODE) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                // the user has the necessary data - create the TTS
-                tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        // check for successful instantiation
-                        if (status == TextToSpeech.SUCCESS) {
-                            if (tts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE)
-                                tts.setLanguage(Locale.US);
-                        } else if (status == TextToSpeech.ERROR) {
-                            throw new RuntimeException("Text-to-speech failed.");
-                        }
-                    }
-                });
-            } else {
-                // no data - install it now
-                Intent installTTSIntent = new Intent();
-                installTTSIntent
-                        .setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(installTTSIntent);
-            }
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-
-    }
-
     public void previewMessage(View view) {
         // detect any tags
         Editable text = editMessage.getText();
@@ -204,10 +188,15 @@ public class MessageActivity extends AppCompatActivity {
         for (TagSpan span : spans){
             int spanEnd = text.getSpanEnd(span);
             int spanStart = text.getSpanStart(span);
-            Log.d(TAG, "span:id="+span.getTag().getId()+","+span.getDrawnText()+ "," + String.valueOf(spanStart) + "," + String.valueOf(spanEnd));
         }
 
         tts.speak(editMessage.getText().toString(),TextToSpeech.QUEUE_FLUSH,null);
+
+        // Tracking
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("previewMessage")
+                .build());
     }
 
     public void cancelMessage(View view) {
@@ -285,17 +274,44 @@ public class MessageActivity extends AppCompatActivity {
     public void insertTagDate(View view) {
         int cursorPos = editMessage.getSelectionStart();
         DateTagInserterFragment.newInstance(cursorPos,1L).show(getSupportFragmentManager(),"date-tag-inserter");
+
+        // Tracking
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("insertTagDate")
+                .build());
     }
 
     public void insertTagCountdown(View view) {
         int cursorPos = editMessage.getSelectionStart();
         CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.DOWN)
                 .show(getSupportFragmentManager(),"countdown-tag-inserter");
+
+        // Tracking
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("insertTagCountdown")
+                .build());
     }
 
     public void insertTagCountup(View view) {
         int cursorPos = editMessage.getSelectionStart();
         CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.UP)
                 .show(getSupportFragmentManager(),"countup-tag-inserter");
+
+        // Tracking
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("insertTagCountup")
+                .build());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

@@ -1,19 +1,20 @@
 TODO:
 Others:
-fix end-of-message cursor bug
 make layout and buttons look decent
 - colours & shading, borders etc
-async stuff to speed up loading
 orientation test all pages
 - check scroll when page overflow
 -
 ads
 cleanup bugs and to-dos
-add terms-of-use agreement start
 
-Check
-- behaviour on close or identical alarms
--
+
+Notes on startup versus AlarmClockExtreme:
+- First page is a 'by clicking continue you agree' page, with terms links etc
+- Second page is a 'thankyou for installing' + recommendation to buy remove ads
+- App pages have a tiny 'remove ad' button above each ad
+- There is a prominent "Upgrade" button in the action bar on the main page
+- Price is $3.89
 
 Testing:
 make some 'espresso tests'
@@ -23,16 +24,20 @@ Test-list:
 
 -- revisit --
 the TTS engine needs to be checked for an installed before the app can be used.
+http://stackoverflow.com/questions/11550746/why-is-the-action-check-tts-data-intent-awkward-to-use
+https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializer.java
+https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializerByAction.java
 
 -- before publish --
-remove all logd
-add all tracking
 
 =next revision todo=
+async stuff to speed up loading
 add tag clicking
 in-app-bill
 premium functionality
 context menu: duplicate
+extend to 'designed for tablets'
+extend to wearable
 
 ----------------------------------------------
 other notes:

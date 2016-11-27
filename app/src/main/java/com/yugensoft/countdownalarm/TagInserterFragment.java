@@ -13,6 +13,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.analytics.Tracker;
+
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Duration;
@@ -43,6 +45,15 @@ public class TagInserterFragment extends DialogFragment {
     protected Tag.TagType mTagType; // always constructed by child onCreates() from the bundle
     protected String mCompareDate; // to save
     protected String mSpeechFormat; // to save
+
+    protected Tracker mTracker;
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getActivity().getApplication()).getDefaultTracker();
+    }
 
     @NonNull
     @Override

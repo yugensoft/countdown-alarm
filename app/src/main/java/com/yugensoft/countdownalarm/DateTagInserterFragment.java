@@ -12,6 +12,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+
 /**
  * Created by yugensoft on 4/11/2016.
  */
@@ -87,5 +89,14 @@ public class DateTagInserterFragment extends TagInserterFragment {
         });
 
         return mFragmentView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

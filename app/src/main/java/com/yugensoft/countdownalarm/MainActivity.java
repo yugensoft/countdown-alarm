@@ -1,14 +1,12 @@
 package com.yugensoft.countdownalarm;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.RingtoneManager;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,14 +18,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +32,12 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "app-debug";
+    private static final boolean DEBUG_LICENSE_AGREE = false;
     private static int REQ_ALARM_ACTIVITY = 0;
+    private static final int REQ_INSTALL_TTS_DATA = 1;
+    private static final int REQ_VOICE_DATA_CHECK = 2;
+
+    public static final String KEY_HAS_AGREED = "agreed";
 
     private Tracker mTracker;
     private DaoSession mDaoSession;
@@ -52,12 +54,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // check if user as agreed to terms yet, and if not open that activity and close this one
+        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_HAS_AGREED,false)){
+            startActivity(new Intent(this,LicenseAgreementActivity.class));
+            finish();
+        }
+        if(DEBUG_LICENSE_AGREE){
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(MainActivity.KEY_HAS_AGREED,false).apply();
+        }
+
         // Get the shared tracker instance
         mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
-
         // get Dao
         mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
-
         // get views
         alarmListView = (ListView)findViewById(R.id.listview_alarms);
 
@@ -69,12 +78,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         alarmListView.setAdapter(alarmListAdapter);
         alarmListView.setOnItemClickListener(this);
 
+        // engage all alarms
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         AlarmFunctions.engageAllAlarms(this,mDaoSession,mAlarmManager);
 
         // The ad
         mAdView = (AdView) findViewById(R.id.adView);
         // todo: load ad, add more ads on other activities
+
+        // check for TTS data
+        Intent checkTTSIntent = new Intent();
+        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkTTSIntent, REQ_VOICE_DATA_CHECK);
+
+        // Obtain the shared Tracker instance.
+        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
     }
 
     @Override
@@ -107,6 +125,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         startActivityForResult(AlarmActivity.newIntent(this,id),REQ_ALARM_ACTIVITY);
     }
 
+    /**
+     * Handle the results from the voice data check activity.
+     * Handle the results from a finished Alarm activity
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQ_ALARM_ACTIVITY){
@@ -114,18 +136,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 long alarmId = data.getLongExtra(AlarmActivity.KEY_ALARM_ID,-1);
                 AlarmFunctions.engageAlarm(mDaoSession.getAlarmDao().loadByRowId(alarmId),this,mDaoSession,mAlarmManager);
             }
+        } else if (requestCode == REQ_VOICE_DATA_CHECK) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // the user has the necessary data
+            } else {
+                // no data - install it now
+                Intent installTTSIntent = new Intent();
+                installTTSIntent
+                        .setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivityForResult(installTTSIntent, REQ_INSTALL_TTS_DATA);
+            }
+        } else if (requestCode == REQ_INSTALL_TTS_DATA) {
+            if(resultCode == TextToSpeech.SUCCESS) {
+                // ok data is installed
+            } else {
+
+            }
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
+
 
     /**
      * Adds a new Alarm to the database and opens it in AlarmActivity
      * @param view
      */
     public void addAlarm(@Nullable View view) {
-        Alarm alarm = Alarm.newDefaultAlarm();
-        Long alarmId = mDaoSession.getAlarmDao().insert(alarm);
-        Log.d(TAG, "addAlarm: " + String.valueOf(alarmId));
-        startActivityForResult(AlarmActivity.newIntent(this, alarmId), REQ_ALARM_ACTIVITY);
+        startActivityForResult(AlarmActivity.newIntent(this, -1L), REQ_ALARM_ACTIVITY);
     }
 
     public void test(@Nullable View view) {
@@ -169,8 +207,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 PackageManager.DONT_KILL_APP);
     }
 
-    //temp
-    public void reloadAlarms(View view) {
-        alarmListAdapter.updateAlarms();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Tracking
+        mTracker.setScreenName("Image~" + this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 }

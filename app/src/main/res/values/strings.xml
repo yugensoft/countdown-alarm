@@ -40,4 +40,16 @@
     <string name="pref_snooze_duration">snooze_duration</string>
     <string name="banner_ad_unit_home_id">TODO</string>
     <string name="set">Set</string>
+    <string name="agree">I Agree</string>
+    <string name="eula">Provided AS IS. No warranty. Etc.</string>
+
+    <string name="title_activity_license_agreement">LicenseAgreementActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="continue_">Continue</string>
+    <string name="icon">icon</string>
+    <string name="welcome_text">Thankyou for downloading Countdown Alarm!</string>
+    <string name="agree_note">By clicking \'Continue\', you agree to the</string>
+    <string name="agree_note_2">License Agreement</string>
+    <string name="ok">OK</string>
 </resources>
