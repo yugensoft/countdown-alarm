@@ -34,16 +34,7 @@
         android:layout_weight="0"
         android:orientation="vertical"
         >
-        <Button
-            android:text="Test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="10dp"
-            android:id="@+id/button_test_alarm"
-            android:onClick="test"
-            />
+
         <Button
             android:text="@string/add_alarm"
             android:layout_width="match_parent"

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Countdown Alarm</string>
+    <string name="app_name">Talking Countdown Alarm</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="insert">Insert</string>
@@ -9,7 +9,7 @@
     <string name="insert_tag_title">Insert Tag</string>
     <string name="speech_format">Speech format:</string>
     <string name="none">(none)</string>
-    <string name="count_up_to">Count up to:</string>
+    <string name="count_up_from">Count up from:</string>
     <string name="count_down_to">Count down to:</string>
     <string name="button_tag_countdown">Countdown</string>
     <string name="button_tag_countup">Countup</string>
@@ -52,4 +52,5 @@
     <string name="agree_note">By clicking \'Continue\', you agree to the</string>
     <string name="agree_note_2">License Agreement</string>
     <string name="ok">OK</string>
+    <string name="snoozing">Snoozing...</string>
 </resources>

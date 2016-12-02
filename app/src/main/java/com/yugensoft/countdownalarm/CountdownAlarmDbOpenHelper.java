@@ -25,7 +25,7 @@ public class CountdownAlarmDbOpenHelper extends DaoMaster.OpenHelper {
         {
             switch (upgradeTo)
             {
-                // todo, remove this, throw exception on default, add case by case
+                // todo, fix / remove this, throw exception on default, add case by case
                 default:
                     DaoMaster.dropAllTables(getWritableDb(),true);
                     onCreate(db);

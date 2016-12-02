@@ -250,7 +250,7 @@ public class MessageActivity extends AppCompatActivity {
             returnString = null;
         } else {
             message = new Message(mMessageId, outputMessageText);
-            mMessageId = messageDao.insert(message);
+            mMessageId = messageDao.insertOrReplace(message);
 
             // remove unused tags from db
             TagDao tagDao = daoSession.getTagDao();

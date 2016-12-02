@@ -45,6 +45,9 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
     private DaoSession mDaoSession;
 
+    private boolean mUserDismissed;
+    private boolean mUserSnoozed;
+
     public static Intent newIntent(
             Context context,
             long alarmId,
@@ -97,10 +100,6 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         String time = AlarmTimeFormatter.convertTimeToReadable(now.getHourOfDay(),now.getMinuteOfHour(),this);
         mTextTime.setText(time);
 
-        // Start the alarm player
-        mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
-        startService(mAlarmPlayerIntent);
-
         // get the next alarm time and set it
         if(!mIsPreview) {
             mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
@@ -126,10 +125,14 @@ public class AlarmReceiverActivity extends AppCompatActivity {
                 alarm.update();
             }
         }
+
+        // Should only ever be dismissed if user presses the dismiss button, otherwise assume 'snooze'
+        mUserDismissed = false;
+        mUserSnoozed = false;
     }
 
     /**
-     * Set of a new alarm pendingIntent back to this activity with the snooze delay added
+     * Set off a new alarm pendingIntent back to this activity with the snooze delay added
      * Then dismiss.
      * @param view
      */
@@ -157,13 +160,52 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
         mAlarmManager.set(AlarmManager.RTC_WAKEUP, snoozedAlarmTime, alarmIntent);
 
-        Toast.makeText(this, "Snoozing...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.snoozing, Toast.LENGTH_SHORT).show();
 
-        dismissAlarm(null);
+        mUserSnoozed = true;
+        stopService(mAlarmPlayerIntent);
+        mAlarmPlayerIntent = null;
+        finish();
     }
 
     public void dismissAlarm(@Nullable View view) {
+        mUserDismissed = true;
         stopService(mAlarmPlayerIntent);
+        mAlarmPlayerIntent = null;
         finish();
     }
+
+    @Override
+    protected void onStart() {
+        // Start the alarm player
+        mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
+        startService(mAlarmPlayerIntent);
+
+        super.onStart();
+    }
+
+    /**
+     * Desired behaviour:
+     * pressed home: snooze
+     * pressed back: snooze
+     * rotated screen: nothing, maintain state
+     * some other activity comes to front: pause alarm, resume it when resume
+     * pressed snooze: snooze
+     * pressed dismiss: dismiss
+     */
+    @Override
+    protected void onStop() {
+        if(!mUserDismissed && !mUserSnoozed && !isChangingConfigurations()){
+            // Activity is stopping without users intent to do so, and without an orientation change
+            // Treat this as a snooze trigger, to ensure alarm not lost
+            snoozeAlarm(null);
+        }
+        // stop the alarm sound, if not already (by a button, for speed purposes)
+        if(mAlarmPlayerIntent != null) {
+            stopService(mAlarmPlayerIntent);
+        }
+
+        super.onStop();
+    }
+
 }

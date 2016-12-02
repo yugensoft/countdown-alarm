@@ -14,10 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import org.joda.time.DateTime;
-import org.joda.time.Months;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.Calendar;
@@ -84,7 +82,7 @@ public class CountingTagInserterFragment extends TagInserterFragment {
         CountingDirection countingDirection = (CountingDirection)args.getSerializable(KEY_COUNTING_DIRECTION);
         if(countingDirection == CountingDirection.UP) {
             mTagType = Tag.TagType.COUNTUP;
-            mComparisonDateLabel.setText(R.string.count_up_to);
+            mComparisonDateLabel.setText(R.string.count_up_from);
         } else {
             mTagType = Tag.TagType.COUNTDOWN;
             mComparisonDateLabel.setText(R.string.count_down_to);

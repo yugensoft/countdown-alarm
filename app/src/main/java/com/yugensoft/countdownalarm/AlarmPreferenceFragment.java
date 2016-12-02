@@ -104,15 +104,14 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
          */
 
         mPrefMessage = getPreferenceManager().findPreference("message");
-        final Long messageId = mAlarm.getMessageId();
-        if(messageId != null){
+        if(mAlarm.getMessageId() != null){
             String taggedText = mAlarm.getMessage().getText();
             mPrefMessage.setSummary(MessageActivity.renderTaggedText(taggedText,daoSession.getTagDao(),getActivity()).toString());
         }
         mPrefMessage.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                startActivityForResult(MessageActivity.newIntent(getActivity(),messageId), REQ_MESSAGE);
+                startActivityForResult(MessageActivity.newIntent(getActivity(),mAlarm.getMessageId()), REQ_MESSAGE);
                 return true;
             }
         });

@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private static final String TAG = "app-debug";
     private static final boolean DEBUG_LICENSE_AGREE = false;
+
     private static int REQ_ALARM_ACTIVITY = 0;
     private static final int REQ_INSTALL_TTS_DATA = 1;
     private static final int REQ_VOICE_DATA_CHECK = 2;

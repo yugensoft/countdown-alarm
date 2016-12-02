@@ -1,36 +1,34 @@
 TODO:
-Others:
-make layout and buttons look decent
-- colours & shading, borders etc
-orientation test all pages
-- check scroll when page overflow
--
-ads
+make tag inserter dialogs presentable (margins, titles etc); 'count down to' is being clipped
+make the tags stop being clipped at the top
+check repeat alarms are working
+check db schema upgrade system works (do some dummy upgrades)
+fix the tag insert-spaces bug
 cleanup bugs and to-dos
+- tts
+the TTS engine needs to be checked for an installed before the app can be used.
+http://stackoverflow.com/questions/11550746/why-is-the-action-check-tts-data-intent-awkward-to-use
+https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializer.java
+https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializerByAction.java
+ads
 
-
-Notes on startup versus AlarmClockExtreme:
-- First page is a 'by clicking continue you agree' page, with terms links etc
-- Second page is a 'thankyou for installing' + recommendation to buy remove ads
-- App pages have a tiny 'remove ad' button above each ad
-- There is a prominent "Upgrade" button in the action bar on the main page
-- Price is $3.89
 
 Testing:
 make some 'espresso tests'
 
 Test-list:
--
+- for repeat & non repeat:
+-- alarm triggers during normal use
+-- alarm triggers after reboot
+-- alarm triggers after cold boot (battery out)
 
--- revisit --
-the TTS engine needs to be checked for an installed before the app can be used.
-http://stackoverflow.com/questions/11550746/why-is-the-action-check-tts-data-intent-awkward-to-use
-https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializer.java
-https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializerByAction.java
 
 -- before publish --
 
 =next revision todo=
+keep the alarm sound going during orientation changes
+add more detail to the "next alarm" box
+improve the appearance, make it pretty etc
 async stuff to speed up loading
 add tag clicking
 in-app-bill
@@ -43,3 +41,10 @@ extend to wearable
 other notes:
 
 previous app construction time including in-app-bill: 162 hours
+
+Notes on startup versus AlarmClockExtreme:
+- First page is a 'by clicking continue you agree' page, with terms links etc
+- Second page is a 'thankyou for installing' + recommendation to buy remove ads
+- App pages have a tiny 'remove ad' button above each ad
+- There is a prominent "Upgrade" button in the action bar on the main page
+- Price is $3.89

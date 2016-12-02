@@ -68,6 +68,7 @@
         android:src="@drawable/ic_action_menu"
         android:layout_gravity="end"
         android:id="@+id/ib_menu"
+        android:background="#00000000"
         />
 
 </LinearLayout>
