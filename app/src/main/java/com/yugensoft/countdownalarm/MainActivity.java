@@ -83,10 +83,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         AlarmFunctions.engageAllAlarms(this,mDaoSession,mAlarmManager);
 
-        // The ad
-        mAdView = (AdView) findViewById(R.id.adView);
-        // todo: load ad, add more ads on other activities
-
         // check for TTS data
         Intent checkTTSIntent = new Intent();
         checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
@@ -94,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Obtain the shared Tracker instance.
         mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
+
+        // The ad
+        mAdView = (AdView) findViewById(R.id.adView);
+        MiscFunctions.loadAdIntoAdView(mAdView);
     }
 
     @Override

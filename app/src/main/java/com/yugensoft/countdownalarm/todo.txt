@@ -1,16 +1,9 @@
 TODO:
-make tag inserter dialogs presentable (margins, titles etc); 'count down to' is being clipped
-make the tags stop being clipped at the top
-check repeat alarms are working
-check db schema upgrade system works (do some dummy upgrades)
-fix the tag insert-spaces bug
-cleanup bugs and to-dos
 - tts
 the TTS engine needs to be checked for an installed before the app can be used.
 http://stackoverflow.com/questions/11550746/why-is-the-action-check-tts-data-intent-awkward-to-use
 https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializer.java
 https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializerByAction.java
-ads
 
 
 Testing:
@@ -36,6 +29,7 @@ premium functionality
 context menu: duplicate
 extend to 'designed for tablets'
 extend to wearable
+add more ads where applicable
 
 ----------------------------------------------
 other notes:

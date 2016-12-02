@@ -46,5 +46,5 @@ apply plugin: 'com.google.gms.google-services'
 
 // greendao related
 greendao {
-    schemaVersion 6
+    schemaVersion 9
 }

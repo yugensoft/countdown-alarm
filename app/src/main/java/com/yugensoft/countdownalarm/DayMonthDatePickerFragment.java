@@ -49,7 +49,7 @@ public class DayMonthDatePickerFragment extends DialogFragment implements DayMon
 
         // Create a new instance of TimePickerDialog and return it
         DayMonthDatePickerDialog dialog = new DayMonthDatePickerDialog(getActivity(), month, day);
-        dialog.setTitle("Set date");
+        dialog.setTitle(getString(R.string.set_date));
         dialog.setDateSetListener(this);
         return dialog;
 
@@ -68,7 +68,7 @@ public class DayMonthDatePickerFragment extends DialogFragment implements DayMon
 
         Toast.makeText(
                 getActivity(),
-                "Date Updated",
+                R.string.date_updated,
                 Toast.LENGTH_LONG
         ).show();
     }

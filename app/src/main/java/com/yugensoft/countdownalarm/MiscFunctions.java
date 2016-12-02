@@ -1,5 +1,7 @@
 package com.yugensoft.countdownalarm;
 
+import android.content.res.Resources;
+
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -7,12 +9,12 @@ public class MiscFunctions {
     /**
      * Returns the correct suffix for the last digit (1st, 2nd, .. , 13th, .. , 23rd)
      */
-    public static String getLastDigitSufix(int number) {
+    public static String getLastDigitSufix(Resources resources, int number) {
         switch( (number<20) ? number : number%10 ) {
-            case 1 : return "st";
-            case 2 : return "nd";
-            case 3 : return "rd";
-            default : return "th";
+            case 1 : return resources.getString(R.string.date_first_number_shorthand);
+            case 2 : return resources.getString(R.string.date_second_number_shorthand);
+            case 3 : return resources.getString(R.string.date_third_number_shorthand);
+            default : return resources.getString(R.string.date_other_number_shorthand);
         }
     }
 

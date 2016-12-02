@@ -37,7 +37,7 @@ public class DateTagInserterFragment extends TagInserterFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Insert Date Tag");
+        dialog.setTitle(R.string.insert_date);
         return dialog;
     }
 
@@ -60,7 +60,7 @@ public class DateTagInserterFragment extends TagInserterFragment {
         // fill radiobuttons with text
         for (int i = 0; i < mRadioGroup.getChildCount(); i++){
             RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
-            rb.setText(renderTag(mTagType,rb.getTag().toString(),null,null));
+            rb.setText(renderTag(getResources(),mTagType,rb.getTag().toString(),null,null));
         }
 
         // click listeners

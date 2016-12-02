@@ -18,33 +18,37 @@ public class AlarmTimeFormatter {
     /**
      * Get the next alarm time in a human readable format
      * @param nextAlarmTime The next alarm time in Date format
-     * @param toastContext Context to display a Toast in; no toast if null
+     * @param addAffixes Add explanatory strings. Make false to get alarm time only.
+     * @param context Needed for res strings and toasts.
+     * @param showToast True to show toasts.
      */
-    public static void getNextAlarmTime(Date nextAlarmTime, boolean addAffixes, @Nullable Context toastContext){
+    public static void getNextAlarmTime(Date nextAlarmTime, boolean addAffixes, Context context, boolean showToast){
         StringBuilder sb = new StringBuilder();
         if(addAffixes) {
-            sb.append("Alarm is set for ");
+            sb.append(context.getString(R.string.alarm_set_for));
+            sb.append(" ");
         }
 
         DateTime dateTime = new DateTime(nextAlarmTime);
         Period period = new Period(DateTime.now(),dateTime);
         PeriodFormatter formatter = new PeriodFormatterBuilder()
                 .appendDays()
-                .appendSuffix(" ").appendSuffix("days").appendSeparator(" ")
+                .appendSuffix(" ").appendSuffix(context.getString(R.string.days)).appendSeparator(" ")
                 .appendHours()
-                .appendSuffix(" ").appendSuffix("hours").appendSeparator(" ")
+                .appendSuffix(" ").appendSuffix(context.getString(R.string.hours)).appendSeparator(" ")
                 .printZeroAlways()
                 .appendMinutes()
-                .appendSuffix(" ").appendSuffix("minutes").appendSeparator(" ","")
+                .appendSuffix(" ").appendSuffix(context.getString(R.string.minutes)).appendSeparator(" ","")
                 .toFormatter();
         sb.append(formatter.print(period));
         if(addAffixes) {
-            sb.append(" from now.");
+            sb.append(" ");
+            sb.append(context.getString(R.string.from_now));
         }
         String output = sb.toString();
 
-        if(toastContext != null) {
-            Toast.makeText(toastContext, output, Toast.LENGTH_LONG).show();
+        if(showToast) {
+            Toast.makeText(context, output, Toast.LENGTH_LONG).show();
         }
     }
 

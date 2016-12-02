@@ -167,7 +167,13 @@ public class MessageActivity extends AppCompatActivity {
                 tag = tagList.get(0);
             }
             // render it as the replacement text
-            spanText = TagInserterFragment.renderTag(tag.getTagType(),tag.getSpeechFormat(),tag.getCompareDate(),null);
+            spanText = TagInserterFragment.renderTag(
+                    context.getResources(),
+                    tag.getTagType(),
+                    tag.getSpeechFormat(),
+                    tag.getCompareDate(),
+                    null
+            );
 
             matcher.appendReplacement(sb, spanText);
             spannable.append(sb.toString());

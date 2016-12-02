@@ -1,6 +1,7 @@
 package com.yugensoft.countdownalarm;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.media.RingtoneManager;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -132,8 +133,9 @@ public class Alarm {
     }
     /**
      * @return The schedule in a human-readable string
+     * @param resources Needed to get string resources
      */
-    public WeeklyRepeatDaysType getScheduleRepeatDays(){
+    public WeeklyRepeatDaysType getScheduleRepeatDays(Resources resources){
         String[] cronParts = schedule.split("\\s+");
         if(cronParts.length != 7){
             throw new RuntimeException("Attempt to render from malformed schedule string: " + schedule);
@@ -141,7 +143,8 @@ public class Alarm {
 
         String daysOfWeek = cronParts[CRON_EXPRESSION_DAYS_OF_WEEK];
         if(repeats == null && !daysOfWeek.equals("*")) { // a ever-repeating days-list schedule
-            StringBuilder outputHumanReadable = new StringBuilder("Every ");
+            StringBuilder outputHumanReadable = new StringBuilder(resources.getString(R.string.every));
+            outputHumanReadable.append(" ");
             Set<String> outputFullWords = new HashSet<String>();
 
             SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
@@ -155,23 +158,27 @@ public class Alarm {
                 throw new RuntimeException("Corrupted list of days: " + daysOfWeek);
             }
 
+            // Sort days in weekly order
+            Arrays.sort(daysList,new DayComparator());
             try {
+                // populate humanReadable
                 if(daysList.length == 1) {
                     // Use full day name if only one day
                     outputHumanReadable.append(sdfLong.format(sdfShort.parse(daysList[0])));
                 } else if(daysList.length == 7) {
                     // Just say 'day' if all days
-                    outputHumanReadable.append("day");
+                    outputHumanReadable.append(resources.getString(R.string.day));
                 } else {
-                    // Sort days in weekly order
-                    Arrays.sort(daysList,new DayComparator());
                     // Use short day names
                     for (String day : daysList) {
                         outputHumanReadable.append(token).append(day);
-                        outputFullWords.add(sdfLong.format(sdfShort.parse(day)));
 
                         token = ", ";
                     }
+                }
+                // populate full words
+                for(String day : daysList){
+                    outputFullWords.add(sdfLong.format(sdfShort.parse(day)));
                 }
             } catch (ParseException e){
                 throw new RuntimeException("Error parsing cron-style days-of-week to long-style");
@@ -180,7 +187,7 @@ public class Alarm {
             return new WeeklyRepeatDaysType(outputFullWords,outputHumanReadable.toString());
 
         } else if(repeats <= 1 && daysOfWeek.equals("*")){ // a single-repeating alarm
-                return new WeeklyRepeatDaysType(new HashSet<String>(),"Never");
+                return new WeeklyRepeatDaysType(new HashSet<String>(),resources.getString(R.string.never));
         } else {
             throw new RuntimeException("Unexpected alarm schedule/repeats: " + String.valueOf(schedule) + " / " + String.valueOf(repeats));
         }

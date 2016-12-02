@@ -1,23 +1,5 @@
 <resources>
-    <string name="app_name">Talking Countdown Alarm</string>
-    <string name="cancel">Cancel</string>
-    <string name="save">Save</string>
-    <string name="insert">Insert</string>
-    <string name="preview">Preview</string>
-    <string name="insert_tags">Insert Tags:</string>
-    <string name="todays_date">Today\'s Date</string>
-    <string name="insert_tag_title">Insert Tag</string>
-    <string name="speech_format">Speech format:</string>
-    <string name="none">(none)</string>
-    <string name="count_up_from">Count up from:</string>
-    <string name="count_down_to">Count down to:</string>
-    <string name="button_tag_countdown">Countdown</string>
-    <string name="button_tag_countup">Countup</string>
-    <string name="menu">menu</string>
-    <string name="title_activity_settings">Settings</string>
-
-    <!-- Strings related to Settings -->
-
+    <!-- String array related to settings -->
     <string-array name="pref_schedule">
         <item>Monday</item>
         <item>Tuesday</item>
@@ -28,29 +10,69 @@
         <item>Sunday</item>
     </string-array>
 
-    <string name="alarm_activity_title">Set alarm</string>
-    <string name="default_message">Good morning!</string>
-    <string name="add_alarm">Add Alarm</string>
-    <string name="snooze">Snooze</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="delete">Delete</string>
-    <string name="snooze_duration">Snooze duration</string>
-    <string name="minutes">minutes</string>
-    <string name="settings">Settings</string>
-    <string name="pref_snooze_duration">snooze_duration</string>
-    <string name="banner_ad_unit_home_id">TODO</string>
-    <string name="set">Set</string>
-    <string name="agree">I Agree</string>
-    <string name="eula">Provided AS IS. No warranty. Etc.</string>
+    <!-- Admob related -->
+    <string name="ad_unit_id_banner_main">ca-app-pub-1900169779942183/8890214553</string>
+    <!-- -->
 
-    <string name="title_activity_license_agreement">LicenseAgreementActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="continue_">Continue</string>
-    <string name="icon">icon</string>
-    <string name="welcome_text">Thankyou for downloading Countdown Alarm!</string>
+    <!-- User readable strings -->
+    <string name="add_alarm">Add Alarm</string>
+    <string name="app_name">Talking Countdown Alarm</string>
     <string name="agree_note">By clicking \'Continue\', you agree to the</string>
     <string name="agree_note_2">License Agreement</string>
+    <string name="alarm_activity_title">Set alarm</string>
+    <string name="alarm_set_for">Alarm is set for</string>
+    <string name="button_tag_countdown">Countdown</string>
+    <string name="button_tag_countup">Countup</string>
+    <string name="cancel">Cancel</string>
+    <string name="choose_date">Please choose a date!</string>
+    <string name="choose_speech">Please choose a speech format!</string>
+    <string name="continue_">Continue</string>
+    <string name="count_down_to">Count down to:</string>
+    <string name="count_up_from">Count up from:</string>
+    <string name="date_first_number_shorthand">st</string>
+    <string name="date_other_number_shorthand">th</string>
+    <string name="date_second_number_shorthand">nd</string>
+    <string name="date_third_number_shorthand">rd</string>
+    <string name="date_updated">Date Updated</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+    <string name="default_message">Good morning!</string>
+    <string name="delete">Delete</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="every">Every</string>
+    <string name="fmt_days">Days</string>
+    <string name="fmt_months_days">Months Days</string>
+    <string name="fmt_months_weeks_days">Months Weeks Days</string>
+    <string name="fmt_weeks_days">Weeks Days</string>
+    <string name="from_now">from now.</string>
+    <string name="hours">hours</string>
+    <string name="icon">icon</string>
+    <string name="insert">Insert</string>
+    <string name="insert_countdown">Insert Countdown Tag</string>
+    <string name="insert_countup">Insert Countup Tag</string>
+    <string name="insert_date">Insert Date Tag</string>
+    <string name="insert_tag_title">Insert Tag</string>
+    <string name="insert_tags">Insert Tags:</string>
+    <string name="menu">menu</string>
+    <string name="minutes">minutes</string>
+    <string name="months">months</string>
+    <string name="never">Never</string>
+    <string name="next_alarm_at">Next alarm is at</string>
+    <string name="none">(none)</string>
     <string name="ok">OK</string>
+    <string name="pref_snooze_duration">snooze_duration</string>
+    <string name="preview">Preview</string>
+    <string name="save">Save</string>
+    <string name="set">Set</string>
+    <string name="set_date">Set date</string>
+    <string name="settings">Settings</string>
+    <string name="snooze">Snooze</string>
+    <string name="snooze_duration">Snooze duration</string>
     <string name="snoozing">Snoozing...</string>
+    <string name="speech_format">Speech format:</string>
+    <string name="title_activity_license_agreement">LicenseAgreementActivity</string>
+    <string name="todays_date">Today\'s Date</string>
+    <string name="weeks">weeks</string>
+    <string name="welcome_text">Thankyou for downloading Talking Countdown Alarm!</string>
+
 </resources>

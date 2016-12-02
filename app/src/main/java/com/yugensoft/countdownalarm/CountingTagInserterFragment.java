@@ -1,6 +1,7 @@
 package com.yugensoft.countdownalarm;
 
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -56,9 +57,9 @@ public class CountingTagInserterFragment extends TagInserterFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         if (getArguments().getSerializable(KEY_COUNTING_DIRECTION) == CountingDirection.UP) {
-            dialog.setTitle("Insert Countup Tag");
+            dialog.setTitle(R.string.insert_countup);
         } else {
-            dialog.setTitle("Insert Countdown Tag");
+            dialog.setTitle(R.string.insert_countdown);
         }
         return dialog;
     }
@@ -144,6 +145,8 @@ public class CountingTagInserterFragment extends TagInserterFragment {
             return;
         }
 
+        Resources resources = getResources();
+
         DateTime dt = DateTime.parse(mCompareDate, DateTimeFormat.forPattern(COMPARE_DATE_STORAGE_FORMAT));
 
         mComparisonDateText.setText(dt.toString("MMM dd"));
@@ -152,7 +155,7 @@ public class CountingTagInserterFragment extends TagInserterFragment {
         mRadioGroup.setVisibility(View.VISIBLE);
         for (int i = 0; i < mRadioGroup.getChildCount(); i++){
             RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
-            rb.setText(renderTag(mTagType,rb.getTag().toString(),mCompareDate,true));
+            rb.setText(renderTag(resources,mTagType,rb.getTag().toString(),mCompareDate,true));
         }
     }
 

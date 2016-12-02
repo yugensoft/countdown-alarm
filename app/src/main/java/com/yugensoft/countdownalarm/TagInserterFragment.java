@@ -1,6 +1,8 @@
 package com.yugensoft.countdownalarm;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,7 +12,9 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 
 import com.google.android.gms.analytics.Tracker;
@@ -27,6 +31,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 public class TagInserterFragment extends DialogFragment {
+    private static final String TAG = "tag-inserter";
 
     protected static final String KEY_CURSOR_POS = "cursor-pos";
     protected static final String KEY_MESSAGE_ID = "message-id";
@@ -60,10 +65,13 @@ public class TagInserterFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.setTitle(R.string.insert_tag_title);
+
+
         return dialog;
     }
 
     public static String renderTag(
+            Resources resources,
             Tag.TagType tagType,
             String speechFormat,
             @Nullable String comparisonDate,
@@ -88,7 +96,7 @@ public class TagInserterFragment extends DialogFragment {
                     daysBetween = Days.daysBetween(nowDate,comDate);
                 }
 
-                renderedOutput = convertDaysToFormat(daysBetween,speechFormat,prependFormat);
+                renderedOutput = convertDaysToFormat(resources, daysBetween,speechFormat,prependFormat);
 
                 break;
             case COUNTUP:
@@ -104,14 +112,14 @@ public class TagInserterFragment extends DialogFragment {
                     daysBetween = Days.daysBetween(comDate,nowDate);
                 }
 
-                renderedOutput = convertDaysToFormat(daysBetween,speechFormat,prependFormat);
+                renderedOutput = convertDaysToFormat(resources,daysBetween,speechFormat,prependFormat);
 
                 break;
             case TODAYS_DATE:
                 // Custom field 'dddd' is replaced manually with 1st,2nd,3rd etc
                 String speechFormatExt = speechFormat.replace(
                         "dddd",
-                        "'" + String.valueOf(now.getDayOfMonth()) + MiscFunctions.getLastDigitSufix(now.getDayOfMonth()) + "'"
+                        "'" + String.valueOf(now.getDayOfMonth()) + MiscFunctions.getLastDigitSufix(resources,now.getDayOfMonth()) + "'"
                 );
                 renderedOutput = now.toString(speechFormatExt);
                 break;
@@ -122,14 +130,14 @@ public class TagInserterFragment extends DialogFragment {
         return renderedOutput;
     }
 
-    public static String convertDaysToFormat(Days daysBetween, String speechFormat, @Nullable Boolean prependFormat){
+    public static String convertDaysToFormat(Resources resources, Days daysBetween, String speechFormat, @Nullable Boolean prependFormat){
         String output;
         int months, weeks, days;
         switch(speechFormat){
             case "dd":
-                output = daysBetween.getDays() + " days";
+                output = daysBetween.getDays() + " " + resources.getString(R.string.days);
                 if(prependFormat != null && prependFormat){
-                    output = String.format("Days (%s)",output);
+                    output = resources.getString(R.string.fmt_days) + " (" + output + ")";
                 }
                 break;
             case "MM dd":
@@ -137,13 +145,13 @@ public class TagInserterFragment extends DialogFragment {
                 days = daysBetween.getDays() % 30;
                 output = "";
                 if (months > 0) {
-                    output += String.valueOf(months) + " months ";
+                    output += String.valueOf(months) + " " + resources.getString(R.string.months) + " ";
                 }
                 if (days > 0 || months == 0){
-                    output += String.valueOf(days) + " days";
+                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
                 }
                 if(prependFormat != null && prependFormat){
-                    output = String.format("Months Days (%s)",output);
+                    output = resources.getString(R.string.fmt_months_days) + " (" + output + ")";
                 }
                 break;
             case "ww dd":
@@ -151,13 +159,13 @@ public class TagInserterFragment extends DialogFragment {
                 days = daysBetween.getDays() % 7;
                 output = "";
                 if (weeks > 0) {
-                    output += String.valueOf(weeks) + " weeks ";
+                    output += String.valueOf(weeks) + " " + resources.getString(R.string.weeks) + " ";
                 }
                 if (days > 0 || weeks == 0){
-                    output += String.valueOf(days) + " days";
+                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
                 }
                 if(prependFormat != null && prependFormat){
-                    output = String.format("Weeks Days (%s)",output);
+                    output = resources.getString(R.string.fmt_weeks_days) + " (" + output + ")";
                 }
                 break;
             case "MM ww dd":
@@ -165,18 +173,18 @@ public class TagInserterFragment extends DialogFragment {
                 int daysRemainder = daysBetween.getDays() % 30;
                 output = "";
                 if (months > 0) {
-                    output += String.valueOf(months) + " months ";
+                    output += String.valueOf(months) + " " + resources.getString(R.string.months) + " ";
                 }
                 weeks = daysRemainder / 7;
                 days = daysRemainder % 7;
                 if (weeks > 0) {
-                    output += String.valueOf(weeks) + " weeks ";
+                    output += String.valueOf(weeks) + " " + resources.getString(R.string.weeks) + " ";
                 }
                 if (days > 0 || (weeks == 0 && months == 0)){
-                    output += String.valueOf(days) + " days";
+                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
                 }
                 if(prependFormat != null && prependFormat){
-                    output = String.format("Months Weeks Days (%s)",output);
+                    output = resources.getString(R.string.fmt_months_weeks_days) + " (" + output + ")";
                 }
                 break;
             default:
@@ -201,13 +209,13 @@ public class TagInserterFragment extends DialogFragment {
         } else {
             // only 'todays date' tag allows no compare date
             if(mTagType != Tag.TagType.TODAYS_DATE) {
-                throw new TagPropertyMissingException("Please choose a date!");
+                throw new TagPropertyMissingException(getString(R.string.choose_date));
             }
         }
         if(mSpeechFormat != null) {
             tag.setSpeechFormat(mSpeechFormat);
         } else {
-            throw new TagPropertyMissingException("Please choose a speech format!");
+            throw new TagPropertyMissingException(getString(R.string.choose_speech));
         }
 
         // insert into tags db table
@@ -216,7 +224,7 @@ public class TagInserterFragment extends DialogFragment {
         long tagId = tagDao.insert(tag);
 
         // generate textual representation of the tag
-        String tagRendering = renderTag(mTagType,mSpeechFormat,mCompareDate,null);
+        String tagRendering = renderTag(getResources(),mTagType,mSpeechFormat,mCompareDate,null);
 
         /**
          * insert span into edittext
@@ -234,17 +242,19 @@ public class TagInserterFragment extends DialogFragment {
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         );
         // make sure spaces either side
-        Spannable padSpaceLeft, padSpaceRight;
-        // todo: not working, always adding spaces
-        if(before.length() > 0 && before.subSequence(before.length()-1,before.length()) != " ") {
-            padSpaceLeft = new SpannableStringBuilder(" ");
-        } else {
-            padSpaceLeft = new SpannableStringBuilder("");
+        SpannableStringBuilder padSpaceLeft = new SpannableStringBuilder();
+        SpannableStringBuilder padSpaceRight = new SpannableStringBuilder();
+        if(before.length() > 0){
+            char beforeChar = before.charAt(before.length()-1);
+            if(beforeChar != ' ') {
+                padSpaceLeft.append(" ");
+            }
         }
-        if(after.length() > 0 && after.subSequence(0,1) != " ") {
-            padSpaceRight = new SpannableStringBuilder(" ");
-        } else {
-            padSpaceRight = new SpannableStringBuilder("");
+        if(after.length() > 0){
+            char afterChar = after.charAt(0);
+            if(afterChar != ' ') {
+                padSpaceRight.append(" ");
+            }
         }
         editMessage.setText(TextUtils.concat(before,padSpaceLeft,newSpan,padSpaceRight,after));
         editMessage.setSelection(editMessage.length());

@@ -117,7 +117,7 @@ public class AlarmListAdapter extends BaseAdapter {
                         (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
                 );
                 if(isChecked) {
-                    AlarmTimeFormatter.getNextAlarmTime(alarm.getNextAlarmTime(),true, mActivity);
+                    AlarmTimeFormatter.getNextAlarmTime(alarm.getNextAlarmTime(),true, mActivity, true);
                 }
                 updateNextAlarm();
             }
@@ -152,8 +152,8 @@ public class AlarmListAdapter extends BaseAdapter {
             }
         });
         // schedule
-        String scheduleText = alarm.getScheduleRepeatDays().humanReadable;
-        scheduleText = scheduleText.equals("Never") ? "" : scheduleText;
+        String scheduleText = alarm.getScheduleRepeatDays(mActivity.getResources()).humanReadable;
+        scheduleText = scheduleText.equals(mActivity.getString(R.string.never)) ? "" : scheduleText;
         wAlarmSchedule.setText(scheduleText);
         // label
         wAlarmLabel.setText(alarm.getLabel());
@@ -266,7 +266,7 @@ public class AlarmListAdapter extends BaseAdapter {
         String mNextAlarm;
         if(alarmsCopy.size() > 0) {
             Date nextAlarm = Collections.min(alarmsCopy, new AlarmNextTimeComparator()).getNextAlarmTime();
-            mNextAlarm = "Next alarm is at " + AlarmTimeFormatter.convertTimeToReadable(nextAlarm, mActivity);
+            mNextAlarm = mActivity.getString(R.string.next_alarm_at) + " " + AlarmTimeFormatter.convertTimeToReadable(nextAlarm, mActivity);
         } else {
             mNextAlarm = "";
         }

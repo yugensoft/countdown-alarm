@@ -3,7 +3,17 @@ package com.yugensoft.countdownalarm;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import org.greenrobot.greendao.database.Database;
+
 public class CountdownAlarmDbOpenHelper extends DaoMaster.OpenHelper {
+
+    /**
+     * for Development purposes
+     * allows unaccounted for schema numbers to cause all tables to be dropped
+     * should be turned off before deployment
+     */
+    private static final boolean DEV = false;
+
     public CountdownAlarmDbOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory) {
         super(context, name, factory);
     }
@@ -18,17 +28,24 @@ public class CountdownAlarmDbOpenHelper extends DaoMaster.OpenHelper {
      * @param newVersion
      */
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(Database db, int oldVersion, int newVersion) {
         // Handle changes in the database between versions
         int upgradeTo = oldVersion + 1;
         while (upgradeTo <= newVersion)
         {
             switch (upgradeTo)
             {
-                // todo, fix / remove this, throw exception on default, add case by case
+                case 9:
+                    // do nothing, no schema changes
+                    break;
+
                 default:
-                    DaoMaster.dropAllTables(getWritableDb(),true);
-                    onCreate(db);
+                    if(DEV) {
+                        DaoMaster.dropAllTables(db, true);
+                        onCreate(db);
+                    } else {
+                        throw new RuntimeException("Unknown schema change");
+                    }
                     break;
 
             }

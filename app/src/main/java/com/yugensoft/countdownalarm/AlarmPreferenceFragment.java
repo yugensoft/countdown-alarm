@@ -118,15 +118,15 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
 
 
         final ExtMultiSelectListPreference prefRepeat = (ExtMultiSelectListPreference)getPreferenceManager().findPreference("repeat");
-        mRepeatDays = mAlarm.getScheduleRepeatDays().fullWords;
+        mRepeatDays = mAlarm.getScheduleRepeatDays(getResources()).fullWords;
         prefRepeat.setValues(mRepeatDays);
-        prefRepeat.setSummary(mAlarm.getScheduleRepeatDays().humanReadable);
+        prefRepeat.setSummary(mAlarm.getScheduleRepeatDays(getResources()).humanReadable);
         prefRepeat.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 mRepeatDays = (Set<String>)newValue;
                 mAlarm.setSchedule(mHour,mMinute,mRepeatDays);
-                prefRepeat.setSummary(mAlarm.getScheduleRepeatDays().humanReadable);
+                prefRepeat.setSummary(mAlarm.getScheduleRepeatDays(getResources()).humanReadable);
                 return true;
             }
         });
@@ -289,7 +289,7 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
             mAlarm.update();
         }
 
-        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity());
+        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity(),true);
 
         return mAlarmId;
     }

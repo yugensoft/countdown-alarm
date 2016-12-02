@@ -189,7 +189,8 @@ public class AlarmPlayerIntentService extends IntentService {
                 mMediaPlayer.start();
             }
         } catch (IOException e) {
-            System.out.println("Problem playing the alarm");
+            // couldn't start the alarm for some reason
+            // let it continue, so any message or vibration can happen
         }
     }
 
