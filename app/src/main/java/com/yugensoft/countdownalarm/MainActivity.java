@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,8 +34,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final boolean DEBUG_LICENSE_AGREE = false;
 
     private static int REQ_ALARM_ACTIVITY = 0;
-    private static final int REQ_INSTALL_TTS_DATA = 1;
-    private static final int REQ_VOICE_DATA_CHECK = 2;
 
     public static final String KEY_HAS_AGREED = "agreed";
 
@@ -82,11 +79,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // engage all alarms
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         AlarmFunctions.engageAllAlarms(this,mDaoSession,mAlarmManager);
-
-        // check for TTS data
-        Intent checkTTSIntent = new Intent();
-        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkTTSIntent, REQ_VOICE_DATA_CHECK);
 
         // Obtain the shared Tracker instance.
         mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
@@ -136,22 +128,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             if(resultCode == AlarmActivity.RES_SAVED) {
                 long alarmId = data.getLongExtra(AlarmActivity.KEY_ALARM_ID,-1);
                 AlarmFunctions.engageAlarm(mDaoSession.getAlarmDao().loadByRowId(alarmId),this,mDaoSession,mAlarmManager);
-            }
-        } else if (requestCode == REQ_VOICE_DATA_CHECK) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                // the user has the necessary data
-            } else {
-                // no data - install it now
-                Intent installTTSIntent = new Intent();
-                installTTSIntent
-                        .setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivityForResult(installTTSIntent, REQ_INSTALL_TTS_DATA);
-            }
-        } else if (requestCode == REQ_INSTALL_TTS_DATA) {
-            if(resultCode == TextToSpeech.SUCCESS) {
-                // ok data is installed
-            } else {
-
             }
         }
 

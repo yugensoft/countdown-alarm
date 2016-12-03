@@ -2,6 +2,7 @@ package com.yugensoft.countdownalarm;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.LocaleList;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -42,6 +44,9 @@ public class MessageActivity extends AppCompatActivity {
 
     // loaded from intent
     private Long mMessageId;
+
+    // keeps track of if Tts is read to use
+    private boolean mTtsReady = true;
 
     private Tracker mTracker;
 
@@ -90,22 +95,13 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        // create the TTS
-        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+        // create the tts
+        tts = TextToSpeechFactory.getTts(this, new TextToSpeechFactory.TextToSpeechDataDownloadCallback() {
             @Override
-            public void onInit(int status) {
-                // check for successful instantiation
-                if (status == TextToSpeech.SUCCESS) {
-                    if (tts.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_AVAILABLE) {
-                        tts.setLanguage(Locale.getDefault());
-                    } else if (tts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
-                        tts.setLanguage(Locale.US);
-                    } else {
-                        // should be impossible, but let it try and continue anyway
-                    }
-                } else if (status == TextToSpeech.ERROR) {
-                    throw new RuntimeException("Text-to-speech failed.");
-                }
+            public boolean onTtsDataDownloadStart() {
+                mTtsReady = false;
+                Toast.makeText(MessageActivity.this, R.string.tts_data_missing_message, Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
 
@@ -140,6 +136,26 @@ public class MessageActivity extends AppCompatActivity {
 
         // Obtain the shared Tracker instance.
         mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
+    }
+
+    /**
+     * Handle the result of any TTS data downloads, if it happens
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == TextToSpeechFactory.REQ_MISSING_DATA_DOWNLOAD){
+            // try to start the TTS again
+            tts = TextToSpeechFactory.getTts(this, new TextToSpeechFactory.TextToSpeechDataDownloadCallback() {
+                @Override
+                public boolean onTtsDataDownloadStart() {
+                    throw new RuntimeException("TTS data is missing and its download wasn't requested.");
+                }
+            });
+            mTtsReady = true;
+        }
     }
 
     public static SpannableStringBuilder renderTaggedText(String text, TagDao tagDao, Context context) {
@@ -188,6 +204,12 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     public void previewMessage(View view) {
+        // check tts ready
+        if(!mTtsReady){
+            Toast.makeText(this, R.string.tts_download_in_prog, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // detect any tags
         Editable text = editMessage.getText();
         TagSpan[] spans = text.getSpans(0,editMessage.length(),TagSpan.class);

@@ -74,5 +74,7 @@
     <string name="todays_date">Today\'s Date</string>
     <string name="weeks">weeks</string>
     <string name="welcome_text">Thankyou for downloading Talking Countdown Alarm!</string>
+    <string name="tts_data_missing_message">Text-to-Speech data missing, starting download...</string>
+    <string name="tts_download_in_prog">Text-to-Speech data download still in progress...</string>
 
 </resources>

@@ -1,9 +1,11 @@
 package com.yugensoft.countdownalarm;
 
 import android.app.AlarmManager;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -47,6 +49,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
     private boolean mUserDismissed;
     private boolean mUserSnoozed;
+    private boolean mFocusDuringOnPause;
 
     public static Intent newIntent(
             Context context,
@@ -126,6 +129,13 @@ public class AlarmReceiverActivity extends AppCompatActivity {
             }
         }
 
+        // Ensure screen unlocked and awake
+        int flags =
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+        this.getWindow().setFlags(flags,flags);
+
         // Should only ever be dismissed if user presses the dismiss button, otherwise assume 'snooze'
         mUserDismissed = false;
         mUserSnoozed = false;
@@ -179,6 +189,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     protected void onStart() {
         // Start the alarm player
         mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
+
         startService(mAlarmPlayerIntent);
 
         super.onStart();
@@ -195,10 +206,14 @@ public class AlarmReceiverActivity extends AppCompatActivity {
      */
     @Override
     protected void onStop() {
-        if(!mUserDismissed && !mUserSnoozed && !isChangingConfigurations()){
+        if(!mUserDismissed && !mUserSnoozed){
             // Activity is stopping without users intent to do so, and without an orientation change
             // Treat this as a snooze trigger, to ensure alarm not lost
-            snoozeAlarm(null);
+            if(!mFocusDuringOnPause){
+                // a startup when the window didn't have focus, such as during lock
+            } else if(!isChangingConfigurations()) {
+                snoozeAlarm(null);
+            }
         }
         // stop the alarm sound, if not already (by a button, for speed purposes)
         if(mAlarmPlayerIntent != null) {
@@ -206,6 +221,11 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         }
 
         super.onStop();
+    }
+
+    public void onPause() {
+        mFocusDuringOnPause = hasWindowFocus();
+        super.onPause();
     }
 
 }

@@ -33,10 +33,13 @@ public class AlarmPlayerIntentService extends IntentService {
     private static final long SETTING_FADE_OUT_TO_TTS_TIME = 2000;
     private static final long SETTING_FADE_IN_TO_TTS_TIME = 2000;
     private static final long SETTING_REPEAT_DELAY = 5000;
+    private static final long OPENING_DELAY = 500;
 
     private String mRingtoneUri;
     private String mMessage;
     private boolean mVibrate;
+
+    private boolean mTtsDisabled = false;
 
     public static Intent newIntent(
             Context context,
@@ -61,21 +64,12 @@ public class AlarmPlayerIntentService extends IntentService {
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mMediaPlayer = new MediaPlayer();
-        mTts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+        mTts = TextToSpeechFactory.getTts(this, new TextToSpeechFactory.TextToSpeechDataDownloadCallback() {
             @Override
-            public void onInit(int status) {
-                // check for successful instantiation
-                if (status == TextToSpeech.SUCCESS) {
-                    if (mTts.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_AVAILABLE) {
-                        mTts.setLanguage(Locale.getDefault());
-                    } else if (mTts.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
-                        mTts.setLanguage(Locale.US);
-                    } else {
-                        // should be impossible, but let it try and continue anyway
-                    }
-                } else if (status == TextToSpeech.ERROR) {
-                    throw new RuntimeException("Text-to-speech failed.");
-                }
+            public boolean onTtsDataDownloadStart() {
+                // Still has no speech data for some reason, don't use it
+                mTtsDisabled = true;
+                return false;
             }
         });
         mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
@@ -95,6 +89,9 @@ public class AlarmPlayerIntentService extends IntentService {
         };
 
         try {
+            // Opening delay, to give time for screen to unlock etc
+//            Thread.sleep(OPENING_DELAY);
+
             // Start vibration
             if(mVibrate) {
                 mVibrator.vibrate(VIBRATION_PATTERN, 0);
@@ -109,7 +106,7 @@ public class AlarmPlayerIntentService extends IntentService {
 
             // Loop until intentService stopped
             while(true) {
-                if(mMessage != null){
+                if(mMessage != null && !mTtsDisabled){
                     // Fade ready for message
                     fade(mMediaPlayer,SETTING_FADE_OUT_TO_TTS_TIME,1.0f,0.2f);
 

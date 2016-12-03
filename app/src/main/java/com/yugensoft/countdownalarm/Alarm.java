@@ -73,8 +73,8 @@ public class Alarm {
         } else {
             // repeat on the given days
             repeats = null;
-            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
-            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.getDefault());
+            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.US);
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.US);
 
             for (String sLong : repeatDays){
                 try {
@@ -147,8 +147,8 @@ public class Alarm {
             outputHumanReadable.append(" ");
             Set<String> outputFullWords = new HashSet<String>();
 
-            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.getDefault());
-            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.getDefault());
+            SimpleDateFormat sdfShort = new SimpleDateFormat("E", Locale.US);
+            SimpleDateFormat sdfLong = new SimpleDateFormat("EEEE", Locale.US);
 
             String token = "";
             String[] daysList = daysOfWeek.split(",");

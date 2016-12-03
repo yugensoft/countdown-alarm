@@ -1,10 +1,5 @@
 TODO:
-- tts
-the TTS engine needs to be checked for an installed before the app can be used.
-http://stackoverflow.com/questions/11550746/why-is-the-action-check-tts-data-intent-awkward-to-use
-https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializer.java
-https://github.com/gast-lib/gast-lib/blob/master/library/src/root/gast/speech/tts/TextToSpeechInitializerByAction.java
-
+fix: with a opening delay, vibrator kept going after back button
 
 Testing:
 make some 'espresso tests'
@@ -30,6 +25,7 @@ context menu: duplicate
 extend to 'designed for tablets'
 extend to wearable
 add more ads where applicable
+preview button has a small bug - lag on open
 
 ----------------------------------------------
 other notes:

@@ -278,6 +278,9 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
      * @return Alarm ID.
      */
     public long saveAlarm(){
+        // cement any time edits
+        mTimePicker.clearFocus();
+
         // assume on save that the alarm is to be activated too
         mAlarm.setActive(true);
 
