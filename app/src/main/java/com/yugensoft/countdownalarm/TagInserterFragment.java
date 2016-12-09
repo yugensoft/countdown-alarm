@@ -70,15 +70,31 @@ public class TagInserterFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Render a tag.
+     * @param resources Resource object, used to get string resources.
+     * @param tagType The tag type, countdown/countup/date etc.
+     * @param speechFormat Format for how to render dates into phrases.
+     * @param referenceTime Reference time against which durations are calculated. Now if null.
+     * @param comparisonDate Date to compare against to get a duration.
+     * @param prependFormat
+     * @return
+     */
     public static String renderTag(
             Resources resources,
             Tag.TagType tagType,
             String speechFormat,
+            @Nullable Long referenceTime,
             @Nullable String comparisonDate,
             @Nullable Boolean prependFormat
-    ){
+    ) {
         String renderedOutput;
-        DateTime now = DateTime.now();
+        DateTime now;
+        if (referenceTime == null){
+            now = DateTime.now();
+        } else {
+            now = new DateTime(referenceTime);
+        }
 
         DateTime comDate,nowDate;
         Days daysBetween;
@@ -130,6 +146,14 @@ public class TagInserterFragment extends DialogFragment {
         return renderedOutput;
     }
 
+    /**
+     * Convert a number of days, by division & remainder, into a weeks/months/days etc representation.
+     * @param resources Resource object to get string resources.
+     * @param daysBetween Duration in days.
+     * @param speechFormat Format for how to render into a phrase.
+     * @param prependFormat Whether or not to prepend format-explaining text like 'Months Weeks Days' etc to the representation.
+     * @return
+     */
     public static String convertDaysToFormat(Resources resources, Days daysBetween, String speechFormat, @Nullable Boolean prependFormat){
         String output;
         int months, weeks, days;
@@ -224,7 +248,7 @@ public class TagInserterFragment extends DialogFragment {
         long tagId = tagDao.insert(tag);
 
         // generate textual representation of the tag
-        String tagRendering = renderTag(getResources(),mTagType,mSpeechFormat,mCompareDate,null);
+        String tagRendering = renderTag(getResources(),mTagType,mSpeechFormat,null,mCompareDate,null);
 
         /**
          * insert span into edittext

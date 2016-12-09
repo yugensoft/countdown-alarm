@@ -131,7 +131,7 @@ public class MessageActivity extends AppCompatActivity {
         }
 
         // populate edittext with message
-        SpannableStringBuilder messageText = renderTaggedText(taggedText, daoSession.getTagDao(), this);
+        SpannableStringBuilder messageText = renderTaggedText(taggedText, daoSession.getTagDao(), this, null);
         editMessage.setText(messageText);
 
         // Obtain the shared Tracker instance.
@@ -158,7 +158,16 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
 
-    public static SpannableStringBuilder renderTaggedText(String text, TagDao tagDao, Context context) {
+    /**
+     * Render the database message text string. That string contains tags in the format:
+     * {t} - where t is the tag ID.
+     * @param text The tagged text
+     * @param tagDao A TagDao object to obtain tag data
+     * @param context Context
+     * @param referenceTime Reference time against which to calculate countdown durations etc.
+     * @return
+     */
+    public static SpannableStringBuilder renderTaggedText(String text, TagDao tagDao, Context context, @Nullable Long referenceTime) {
         StringBuffer sb = new StringBuffer();
         SpannableStringBuilder spannable = new SpannableStringBuilder();
         String regex = "\\{.*?\\}";
@@ -187,6 +196,7 @@ public class MessageActivity extends AppCompatActivity {
                     context.getResources(),
                     tag.getTagType(),
                     tag.getSpeechFormat(),
+                    referenceTime,
                     tag.getCompareDate(),
                     null
             );
@@ -233,7 +243,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     /**
-     * Save the message into the database and return it's raw text to calling activity
+     * Save the message into the database and return its raw text to calling activity
      * @param view
      */
     public void saveMessage(@Nullable View view) {

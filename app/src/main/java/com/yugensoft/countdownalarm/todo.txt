@@ -1,19 +1,28 @@
 TODO:
-fix: with a opening delay, vibrator kept going after back button
+fix: home button didn't snooze the booted-alarm
 
 Testing:
 make some 'espresso tests'
 
 Test-list:
-- for repeat & non repeat:
+- for non repeat:
+-- alarm triggers during normal use               YES
+-- alarm triggers after reboot
+-- alarm triggers after cold boot (battery out)
+- for repeat
 -- alarm triggers during normal use
 -- alarm triggers after reboot
 -- alarm triggers after cold boot (battery out)
+- repeating alarm re-triggers with single alarm overlapping
+- snoozed alarm deleted pre re-trigger
+- user pastes a curly into msg
+- alarm starts and other alarm app starts
 
 
 -- before publish --
 
-=next revision todo=
+=todo next revision (prioritize this list)
+make the notification show on BootBroadcast
 keep the alarm sound going during orientation changes
 add more detail to the "next alarm" box
 improve the appearance, make it pretty etc

@@ -9,6 +9,7 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,6 +21,8 @@ import org.joda.time.DateTime;
 import java.util.Date;
 
 public class AlarmReceiverActivity extends AppCompatActivity {
+    private static final String TAG = "alarm-receiver";
+
     public static final String KEY_ALARM_ID = "alarm-id";
     public static final String KEY_RINGTONE_URI = "ringtone-uri";
     public static final String KEY_MESSAGE = "message";
@@ -50,6 +53,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     private boolean mUserDismissed;
     private boolean mUserSnoozed;
     private boolean mFocusDuringOnPause;
+    private PowerManager mPowerManager;
 
     public static Intent newIntent(
             Context context,
@@ -130,11 +134,11 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         }
 
         // Ensure screen unlocked and awake
-        int flags =
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-        this.getWindow().setFlags(flags,flags);
+        mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         // Should only ever be dismissed if user presses the dismiss button, otherwise assume 'snooze'
         mUserDismissed = false;
@@ -147,7 +151,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
      * @param view
      */
     public void snoozeAlarm(@Nullable View view) {
-        long snoozedAlarmTime = mTriggeredTime + mSnoozeDuration;
+        long snoozedAlarmTime = new Date().getTime() + mSnoozeDuration;
 
         Intent intent = AlarmReceiverActivity.newIntent(
                 this,
@@ -187,10 +191,16 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        // Start the alarm player
-        mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
+        Log.d(TAG, "onStart: " + (mPowerManager.isScreenOn() ? "screen on" : "screen off"));
 
-        startService(mAlarmPlayerIntent);
+        // don't start the alarm if screen is still off, wait for next cycle
+        if(mPowerManager.isScreenOn()){
+            // Start the alarm player
+            mAlarmPlayerIntent = AlarmPlayerIntentService.newIntent(this,mRingtoneUri,mVibrate,mMessage);
+
+            startService(mAlarmPlayerIntent);
+
+        }
 
         super.onStart();
     }
@@ -206,6 +216,13 @@ public class AlarmReceiverActivity extends AppCompatActivity {
      */
     @Override
     protected void onStop() {
+        Log.d(
+                TAG, "onStop: " +
+                " by user button:"+String.valueOf(mUserDismissed||mUserSnoozed) +
+                " change config:"+String.valueOf(isChangingConfigurations()) +
+                " screen on:"+String.valueOf(mPowerManager.isScreenOn())
+        );
+
         if(!mUserDismissed && !mUserSnoozed){
             // Activity is stopping without users intent to do so, and without an orientation change
             // Treat this as a snooze trigger, to ensure alarm not lost
@@ -224,8 +241,12 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     }
 
     public void onPause() {
+        Log.d(TAG, "onPause: " + (hasWindowFocus() ? "window focus" : "no window focus"));
+
         mFocusDuringOnPause = hasWindowFocus();
         super.onPause();
     }
+
+
 
 }

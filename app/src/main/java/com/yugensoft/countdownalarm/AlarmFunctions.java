@@ -39,13 +39,20 @@ public class AlarmFunctions {
         // get snooze details
         long snoozeDuration = SettingsActivity.getSnoozeDurationInMs(context);
 
+        long triggerTime = alarm.getNextAlarmTime().getTime();
+
+        // prepare the message
         String message;
         if(alarm.getMessageId() == null) {
             message = null;
         } else {
-            message = MessageActivity.renderTaggedText(alarm.getMessage().getText(), daoSession.getTagDao(),context).toString();
+            message = MessageActivity.renderTaggedText(
+                    alarm.getMessage().getText(),
+                    daoSession.getTagDao(),
+                    context,
+                    triggerTime
+            ).toString();
         }
-        long triggerTime = alarm.getNextAlarmTime().getTime();
 
         // Create the pending intent
         Intent intent = AlarmReceiverActivity.newIntent(

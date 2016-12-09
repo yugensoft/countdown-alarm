@@ -155,7 +155,7 @@ public class CountingTagInserterFragment extends TagInserterFragment {
         mRadioGroup.setVisibility(View.VISIBLE);
         for (int i = 0; i < mRadioGroup.getChildCount(); i++){
             RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
-            rb.setText(renderTag(resources,mTagType,rb.getTag().toString(),mCompareDate,true));
+            rb.setText(renderTag(resources,mTagType,rb.getTag().toString(),null,mCompareDate,true));
         }
     }
 

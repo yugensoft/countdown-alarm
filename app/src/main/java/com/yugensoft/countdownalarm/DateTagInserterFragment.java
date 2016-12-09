@@ -60,7 +60,7 @@ public class DateTagInserterFragment extends TagInserterFragment {
         // fill radiobuttons with text
         for (int i = 0; i < mRadioGroup.getChildCount(); i++){
             RadioButton rb = (RadioButton)mRadioGroup.getChildAt(i);
-            rb.setText(renderTag(getResources(),mTagType,rb.getTag().toString(),null,null));
+            rb.setText(renderTag(getResources(),mTagType,rb.getTag().toString(),null,null,null));
         }
 
         // click listeners

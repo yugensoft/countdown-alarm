@@ -192,7 +192,8 @@ public class AlarmListAdapter extends BaseAdapter {
             message = MessageActivity.renderTaggedText(
                     alarm.getMessage().getText(),
                     mDaoSession.getTagDao(),
-                    mActivity
+                    mActivity,
+                    null
             ).toString();
         }
         Intent intent = AlarmReceiverActivity.newIntent(
