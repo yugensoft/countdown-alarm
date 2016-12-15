@@ -6,10 +6,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.PopupMenu;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,7 +25,6 @@ import org.greenrobot.greendao.async.AsyncOperation;
 import org.greenrobot.greendao.async.AsyncOperationListener;
 import org.greenrobot.greendao.async.AsyncSession;
 import org.greenrobot.greendao.query.Query;
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,7 +114,7 @@ public class AlarmListAdapter extends BaseAdapter {
                         (AlarmManager)mActivity.getSystemService(Context.ALARM_SERVICE)
                 );
                 if(isChecked) {
-                    AlarmTimeFormatter.getNextAlarmTime(alarm.getNextAlarmTime(),true, mActivity, true);
+                    TimeFormatters.getNextAlarmTime(alarm.getNextAlarmTime(),true, mActivity, true);
                 }
                 updateNextAlarm();
             }
@@ -267,7 +264,7 @@ public class AlarmListAdapter extends BaseAdapter {
         String mNextAlarm;
         if(alarmsCopy.size() > 0) {
             Date nextAlarm = Collections.min(alarmsCopy, new AlarmNextTimeComparator()).getNextAlarmTime();
-            mNextAlarm = mActivity.getString(R.string.next_alarm_at) + " " + AlarmTimeFormatter.convertTimeToReadable(nextAlarm, mActivity);
+            mNextAlarm = mActivity.getString(R.string.next_alarm_at) + " " + TimeFormatters.convertTimeToReadable(nextAlarm, mActivity);
         } else {
             mNextAlarm = "";
         }

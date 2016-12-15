@@ -1,9 +1,7 @@
 package com.yugensoft.countdownalarm;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,23 +10,14 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.EditText;
 
 import com.google.android.gms.analytics.Tracker;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.joda.time.Duration;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatterBuilder;
-import org.joda.time.format.DateTimeParser;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
 public class TagInserterFragment extends DialogFragment {
     private static final String TAG = "tag-inserter";
@@ -77,8 +66,8 @@ public class TagInserterFragment extends DialogFragment {
      * @param speechFormat Format for how to render dates into phrases.
      * @param referenceTime Reference time against which durations are calculated. Now if null.
      * @param comparisonDate Date to compare against to get a duration.
-     * @param prependFormat
-     * @return
+     * @param prependFormat Whether or not to prepend explanatory text.
+     * @return Rendered tag string.
      */
     public static String renderTag(
             Resources resources,
@@ -112,7 +101,7 @@ public class TagInserterFragment extends DialogFragment {
                     daysBetween = Days.daysBetween(nowDate,comDate);
                 }
 
-                renderedOutput = convertDaysToFormat(resources, daysBetween,speechFormat,prependFormat);
+                renderedOutput = TimeFormatters.convertDaysToSpeechFormat(resources, daysBetween,speechFormat,prependFormat);
 
                 break;
             case COUNTUP:
@@ -128,7 +117,7 @@ public class TagInserterFragment extends DialogFragment {
                     daysBetween = Days.daysBetween(comDate,nowDate);
                 }
 
-                renderedOutput = convertDaysToFormat(resources,daysBetween,speechFormat,prependFormat);
+                renderedOutput = TimeFormatters.convertDaysToSpeechFormat(resources,daysBetween,speechFormat,prependFormat);
 
                 break;
             case TODAYS_DATE:
@@ -147,77 +136,9 @@ public class TagInserterFragment extends DialogFragment {
     }
 
     /**
-     * Convert a number of days, by division & remainder, into a weeks/months/days etc representation.
-     * @param resources Resource object to get string resources.
-     * @param daysBetween Duration in days.
-     * @param speechFormat Format for how to render into a phrase.
-     * @param prependFormat Whether or not to prepend format-explaining text like 'Months Weeks Days' etc to the representation.
-     * @return
+     * Insert a tag into the EditText of the MessageActivity, using the data in this Fragment
+     * @throws TagPropertyMissingException
      */
-    public static String convertDaysToFormat(Resources resources, Days daysBetween, String speechFormat, @Nullable Boolean prependFormat){
-        String output;
-        int months, weeks, days;
-        switch(speechFormat){
-            case "dd":
-                output = daysBetween.getDays() + " " + resources.getString(R.string.days);
-                if(prependFormat != null && prependFormat){
-                    output = resources.getString(R.string.fmt_days) + " (" + output + ")";
-                }
-                break;
-            case "MM dd":
-                months = daysBetween.getDays() / 30;
-                days = daysBetween.getDays() % 30;
-                output = "";
-                if (months > 0) {
-                    output += String.valueOf(months) + " " + resources.getString(R.string.months) + " ";
-                }
-                if (days > 0 || months == 0){
-                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
-                }
-                if(prependFormat != null && prependFormat){
-                    output = resources.getString(R.string.fmt_months_days) + " (" + output + ")";
-                }
-                break;
-            case "ww dd":
-                weeks = daysBetween.getDays() / 7;
-                days = daysBetween.getDays() % 7;
-                output = "";
-                if (weeks > 0) {
-                    output += String.valueOf(weeks) + " " + resources.getString(R.string.weeks) + " ";
-                }
-                if (days > 0 || weeks == 0){
-                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
-                }
-                if(prependFormat != null && prependFormat){
-                    output = resources.getString(R.string.fmt_weeks_days) + " (" + output + ")";
-                }
-                break;
-            case "MM ww dd":
-                months = daysBetween.getDays() / 30;
-                int daysRemainder = daysBetween.getDays() % 30;
-                output = "";
-                if (months > 0) {
-                    output += String.valueOf(months) + " " + resources.getString(R.string.months) + " ";
-                }
-                weeks = daysRemainder / 7;
-                days = daysRemainder % 7;
-                if (weeks > 0) {
-                    output += String.valueOf(weeks) + " " + resources.getString(R.string.weeks) + " ";
-                }
-                if (days > 0 || (weeks == 0 && months == 0)){
-                    output += String.valueOf(days) + " " + resources.getString(R.string.days);
-                }
-                if(prependFormat != null && prependFormat){
-                    output = resources.getString(R.string.fmt_months_weeks_days) + " (" + output + ")";
-                }
-                break;
-            default:
-                throw new RuntimeException("Unknown countdown speech format");
-
-        }
-        return output;
-    }
-
     protected void insertTag() throws TagPropertyMissingException {
         Tag tag = new Tag();
         tag.setMessageId(mMessageId);

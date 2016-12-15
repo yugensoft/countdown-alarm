@@ -1,16 +1,13 @@
 TODO:
 fix: home button didn't snooze the booted-alarm
 
-Testing:
-make some 'espresso tests'
-
 Test-list:
 - for non repeat:
 -- alarm triggers during normal use               YES
 -- alarm triggers after reboot
 -- alarm triggers after cold boot (battery out)
 - for repeat
--- alarm triggers during normal use
+-- alarm triggers during normal use               YES
 -- alarm triggers after reboot
 -- alarm triggers after cold boot (battery out)
 - repeating alarm re-triggers with single alarm overlapping
@@ -22,6 +19,7 @@ Test-list:
 -- before publish --
 
 =todo next revision (prioritize this list)
+make some 'espresso tests'
 make the notification show on BootBroadcast
 keep the alarm sound going during orientation changes
 add more detail to the "next alarm" box
@@ -34,7 +32,8 @@ context menu: duplicate
 extend to 'designed for tablets'
 extend to wearable
 add more ads where applicable
-preview button has a small bug - lag on open
+==minor bugs:
+preview button has a lag on open
 
 ----------------------------------------------
 other notes:

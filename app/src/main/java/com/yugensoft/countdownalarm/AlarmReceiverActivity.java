@@ -1,7 +1,6 @@
 package com.yugensoft.countdownalarm;
 
 import android.app.AlarmManager;
-import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -104,7 +103,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
         // show the time
         DateTime now = new DateTime();
-        String time = AlarmTimeFormatter.convertTimeToReadable(now.getHourOfDay(),now.getMinuteOfHour(),this);
+        String time = TimeFormatters.convertTimeToReadable(now.getHourOfDay(),now.getMinuteOfHour(),this);
         mTextTime.setText(time);
 
         // get the next alarm time and set it

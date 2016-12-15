@@ -205,7 +205,7 @@ public class Alarm {
         int hour = Integer.valueOf(cronParts[CRON_EXPRESSION_HOURS]);
         int minute = Integer.valueOf(cronParts[CRON_EXPRESSION_MINUTES]);
 
-        String time = AlarmTimeFormatter.convertTimeToReadable(hour,minute,context);
+        String time = TimeFormatters.convertTimeToReadable(hour,minute,context);
         return new AlarmTimeType(hour, minute, time);
     }
 

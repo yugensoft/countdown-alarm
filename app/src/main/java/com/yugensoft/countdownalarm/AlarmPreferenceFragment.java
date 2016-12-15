@@ -8,16 +8,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
-import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
-import java.util.List;
 import java.util.Set;
 
 
@@ -292,7 +289,7 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
             mAlarm.update();
         }
 
-        AlarmTimeFormatter.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity(),true);
+        TimeFormatters.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity(),true);
 
         return mAlarmId;
     }
