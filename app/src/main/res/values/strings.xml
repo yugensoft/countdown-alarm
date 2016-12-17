@@ -15,6 +15,7 @@
     <!-- -->
 
     <!-- User readable strings -->
+    <string name="about_text">App developed by Yugensoft\n\u00A9 2016\n\nQuestions, feedback, complaints and requests to:\ntalkingalarm@yugensoft.com</string>
     <string name="add_alarm">Add Alarm</string>
     <string name="app_name">Talking Countdown Alarm</string>
     <string name="agree_note">By clicking \'Continue\', you agree to the</string>
@@ -76,5 +77,6 @@
     <string name="welcome_text">Thankyou for downloading Talking Countdown Alarm!</string>
     <string name="tts_data_missing_message">Text-to-Speech data missing, starting download...</string>
     <string name="tts_download_in_prog">Text-to-Speech data download still in progress...</string>
+    <string name="about">About</string>
 
 </resources>

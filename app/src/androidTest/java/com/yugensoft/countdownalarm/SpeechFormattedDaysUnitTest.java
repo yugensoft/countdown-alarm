@@ -29,7 +29,7 @@ public class SpeechFormattedDaysUnitTest {
 
         for(int x=0; x<=365; x++){
             String s = TimeFormatters.convertDaysToSpeechFormat(context.getResources(), Days.days(x),speechFormat,false);
-            Log.d(TAG, s + "\t\t" + String.valueOf(x));
+//            Log.d(TAG, s + "\t\t" + String.valueOf(x));
         }
 //        assertEquals("1 week 3 days",s);
     }

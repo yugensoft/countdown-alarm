@@ -4,4 +4,8 @@
         android:id="@+id/mi_settings"
         android:title="@string/settings"
         />
+    <item
+        android:id="@+id/mi_about"
+        android:title="@string/about"
+        />
 </menu>

@@ -190,7 +190,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        Log.d(TAG, "onStart: " + (mPowerManager.isScreenOn() ? "screen on" : "screen off"));
+//        Log.d(TAG, "onStart: " + (mPowerManager.isScreenOn() ? "screen on" : "screen off"));
 
         // don't start the alarm if screen is still off, wait for next cycle
         if(mPowerManager.isScreenOn()){
@@ -215,12 +215,12 @@ public class AlarmReceiverActivity extends AppCompatActivity {
      */
     @Override
     protected void onStop() {
-        Log.d(
-                TAG, "onStop: " +
-                " by user button:"+String.valueOf(mUserDismissed||mUserSnoozed) +
-                " change config:"+String.valueOf(isChangingConfigurations()) +
-                " screen on:"+String.valueOf(mPowerManager.isScreenOn())
-        );
+//        Log.d(
+//                TAG, "onStop: " +
+//                " by user button:"+String.valueOf(mUserDismissed||mUserSnoozed) +
+//                " change config:"+String.valueOf(isChangingConfigurations()) +
+//                " screen on:"+String.valueOf(mPowerManager.isScreenOn())
+//        );
 
         if(!mUserDismissed && !mUserSnoozed){
             // Activity is stopping without users intent to do so, and without an orientation change
@@ -240,7 +240,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
     }
 
     public void onPause() {
-        Log.d(TAG, "onPause: " + (hasWindowFocus() ? "window focus" : "no window focus"));
+//        Log.d(TAG, "onPause: " + (hasWindowFocus() ? "window focus" : "no window focus"));
 
         mFocusDuringOnPause = hasWindowFocus();
         super.onPause();

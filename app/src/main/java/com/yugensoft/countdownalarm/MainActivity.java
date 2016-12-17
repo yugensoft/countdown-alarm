@@ -108,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case R.id.mi_settings:
                 startActivity(new Intent(this,SettingsActivity.class));
                 return true;
+            case R.id.mi_about:
+                new AboutFragment().show(getSupportFragmentManager(), "about_dialog");
+                return true;
             default:
                 return false;
         }

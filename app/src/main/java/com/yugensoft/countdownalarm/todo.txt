@@ -1,26 +1,24 @@
 TODO:
-fix: home button didn't snooze the booted-alarm
 
 Test-list:
 - for non repeat:
 -- alarm triggers during normal use               YES
--- alarm triggers after reboot
--- alarm triggers after cold boot (battery out)
+-- alarm triggers after reboot                    YES
+-- alarm triggers after cold boot (battery out)   YES
 - for repeat
 -- alarm triggers during normal use               YES
 -- alarm triggers after reboot
 -- alarm triggers after cold boot (battery out)
 - repeating alarm re-triggers with single alarm overlapping
-- snoozed alarm deleted pre re-trigger
-- user pastes a curly into msg
-- alarm starts and other alarm app starts
+- snoozed alarm deleted pre re-trigger            YES, snooze pendingIntent is cleared
+- user pastes a curly into msg                    YES, currently any paste impossible
+- alarm starts and other alarm app starts         YES, snoozes
 
-
--- before publish --
 
 =todo next revision (prioritize this list)
 make some 'espresso tests'
 make the notification show on BootBroadcast
+make the notifications / notification icon persistent
 keep the alarm sound going during orientation changes
 add more detail to the "next alarm" box
 improve the appearance, make it pretty etc
