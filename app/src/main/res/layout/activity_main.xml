@@ -34,23 +34,38 @@
         android:layout_weight="0"
         android:orientation="vertical"
         >
-
-        <Button
-            android:text="@string/add_alarm"
+        
+        <FrameLayout
+            android:id="@+id/button_add_alarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/button_add_alarm"
+            style="@style/buttonCustom"
+            android:orientation="horizontal"
+            android:clickable="true"
             android:onClick="addAlarm"
-            />
+            >
+            <TextView
+                style="@style/buttonCustom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
+                android:background="#0000"
+                android:text="@string/add_alarm"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:drawableLeft="@drawable/ic_action_add"
+                />
+
+        </FrameLayout>
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/adView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
-            android:layout_alignParentBottom="true"
             ads:adSize="BANNER"
             ads:adUnitId="@string/ad_unit_id_banner_main">
         </com.google.android.gms.ads.AdView>

@@ -18,7 +18,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.greenrobot.greendao.async.AsyncOperation;
@@ -90,11 +89,12 @@ public class AlarmListAdapter extends BaseAdapter {
         TextView wAlarmTime = (TextView)convertView.findViewById(R.id.text_time);
         TextView wAlarmSchedule = (TextView)convertView.findViewById(R.id.text_alarm_schedule);
         TextView wAlarmLabel = (TextView)convertView.findViewById(R.id.text_alarm_label);
-        ImageView wMessage = (ImageView)convertView.findViewById(R.id.iv_message);
+        ImageView wMessageIcon = (ImageView)convertView.findViewById(R.id.iv_message);
+        TextView wMessageText = (TextView) convertView.findViewById(R.id.text_message);
         ImageButton wMenu = (ImageButton)convertView.findViewById(R.id.ib_menu);
         // layouts
-        LinearLayout llAlarmSchedule= (LinearLayout)convertView.findViewById(R.id.ll_alarm_schedule);
-        LinearLayout llAlarmLabel = (LinearLayout)convertView.findViewById(R.id.ll_alarm_label);
+//        LinearLayout llAlarmSchedule= (LinearLayout)convertView.findViewById(R.id.ll_alarm_schedule);
+//        LinearLayout llAlarmLabel = (LinearLayout)convertView.findViewById(R.id.ll_alarm_label);
 
         /**
          * populate data & setup controls
@@ -152,12 +152,24 @@ public class AlarmListAdapter extends BaseAdapter {
         String scheduleText = alarm.getScheduleRepeatDays(mActivity.getResources()).humanReadable;
         scheduleText = scheduleText.equals(mActivity.getString(R.string.never)) ? "" : scheduleText;
         wAlarmSchedule.setText(scheduleText);
+        if(scheduleText.length() == 0) {
+            wAlarmSchedule.setVisibility(View.GONE);
+        } else {
+            wAlarmSchedule.setVisibility(View.VISIBLE);
+        }
         // label
         wAlarmLabel.setText(alarm.getLabel());
-        if(alarm.getMessageId() == null) {
-            wMessage.setVisibility(View.INVISIBLE);
-        }else{
-            wMessage.setVisibility(View.VISIBLE);
+        // message
+        if (alarm.getMessageId() == null) {
+            wMessageIcon.setVisibility(View.GONE);
+            wMessageText.setText("");
+            wMessageText.setVisibility(View.GONE);
+        } else {
+            wMessageIcon.setVisibility(View.VISIBLE);
+            String text = alarm.getMessage().getText();
+            text = "\"" + MessageActivity.renderTaggedText(text, mDaoSession.getTagDao(), mActivity, alarm.getNextAlarmTime().getTime()).toString() + "\"";
+            wMessageText.setText(text);
+            wMessageText.setVisibility(View.VISIBLE);
         }
 
         return convertView;

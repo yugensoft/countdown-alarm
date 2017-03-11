@@ -78,5 +78,13 @@
     <string name="tts_data_missing_message">Text-to-Speech data missing, starting download...</string>
     <string name="tts_download_in_prog">Text-to-Speech data download still in progress...</string>
     <string name="about">About</string>
+    <string name="speech_format_day_only">EEEE</string>
+    <string name="speech_format_date_of_month">dddd \'of\' MMMM</string>
+    <string name="speech_format_date_the_month">MMMM \'the\' dddd</string>
+    <string name="speech_format_date_of_month_and_year">dddd \'of\' MMMM YYYY</string>
+    <string name="speech_format_month_the_date_and_year">MMMM \'the\' dddd YYYY</string>
+    <string name="my_example_alarm">My example alarm</string>
+    <string name="message">message</string>
+    <string name="example_alarm">Good morning! Today is {%1$d}.</string>
 
 </resources>

@@ -5,11 +5,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +23,7 @@ import com.google.android.gms.analytics.Tracker;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -32,10 +33,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private static final String TAG = "app-debug";
     private static final boolean DEBUG_LICENSE_AGREE = false;
+    private static final boolean DEBUG_EXAMPLE_ALARM = false;
+
+    private static final int EXAMPLE_ALARM_HOUR = 8;
+    private static final int EXAMPLE_ALARM_MINUTE = 30;
 
     private static int REQ_ALARM_ACTIVITY = 0;
 
     public static final String KEY_HAS_AGREED = "agreed";
+    private static final String KEY_HAS_FIRST_RUN = "firstrun";
 
     private Tracker mTracker;
     private DaoSession mDaoSession;
@@ -53,20 +59,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
 
         // check if user as agreed to terms yet, and if not open that activity and close this one
-        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_HAS_AGREED,false)){
-            startActivity(new Intent(this,LicenseAgreementActivity.class));
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_HAS_AGREED, false)) {
+            startActivity(new Intent(this, LicenseAgreementActivity.class));
             finish();
         }
-        if(DEBUG_LICENSE_AGREE){
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(MainActivity.KEY_HAS_AGREED,false).apply();
+        if (DEBUG_LICENSE_AGREE) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(MainActivity.KEY_HAS_AGREED, false).apply();
         }
 
         // Get the shared tracker instance
-        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
+        mTracker = ((CountdownAlarmApplication) getApplication()).getDefaultTracker();
         // get Dao
         mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
         // get views
-        alarmListView = (ListView)findViewById(R.id.listview_alarms);
+        alarmListView = (ListView) findViewById(R.id.listview_alarms);
+
+        // Check if this is the first run, and if so add the example alarm
+        if(DEBUG_EXAMPLE_ALARM){
+            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(MainActivity.KEY_HAS_FIRST_RUN).apply();
+            mDaoSession.getAlarmDao().deleteAll();
+            mDaoSession.getTagDao().deleteAll();
+            mDaoSession.getMessageDao().deleteAll();
+        }
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_HAS_FIRST_RUN, false)) {
+            insertExampleAlarm();
+
+            // save
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(MainActivity.KEY_HAS_FIRST_RUN, true).apply();
+        }
 
         // Alarm list
         alarmListAdapter = new AlarmListAdapter(
@@ -77,15 +97,57 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         alarmListView.setOnItemClickListener(this);
 
         // engage all alarms
-        mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        AlarmFunctions.engageAllAlarms(this,mDaoSession,mAlarmManager);
+        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        AlarmFunctions.engageAllAlarms(this, mDaoSession, mAlarmManager);
 
         // Obtain the shared Tracker instance.
-        mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
+        mTracker = ((CountdownAlarmApplication) getApplication()).getDefaultTracker();
 
         // The ad
         mAdView = (AdView) findViewById(R.id.adView);
         MiscFunctions.loadAdIntoAdView(mAdView);
+
+    }
+
+    /**
+     * Inserts an example alarm to provide a better user landing experience
+     * The example alarm has a message, and that message has a tag in it.
+     */
+    private void insertExampleAlarm() {
+        MessageDao messageDao = mDaoSession.getMessageDao();
+        AlarmDao alarmDao = mDaoSession.getAlarmDao();
+        TagDao tagDao = mDaoSession.getTagDao();
+
+        // make message with placeholder text
+        Message message = new Message();
+        message.setText("---");
+        long messageId = messageDao.insert(message);
+
+        // create a date tag
+        Tag tag = new Tag();
+        tag.setMessageId(messageId);
+        tag.setTagType(Tag.TagType.TODAYS_DATE);
+        tag.setSpeechFormat(getString(R.string.speech_format_day_only));
+        long tagId = tagDao.insert(tag);
+
+        // create the real message which includes the tag, and update it
+        message.setText(getString(R.string.example_alarm, tagId));
+        messageDao.update(message);
+
+        // create the example alarm
+        Alarm alarm = new Alarm();
+        alarm.setActive(false);
+        alarm.setMessage(message);
+        alarm.setLabel(getString(R.string.my_example_alarm));
+        alarm.setRingtone(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString()); // use default
+        alarm.setVibrate(false);
+        alarm.setRepeats(null); // forever
+        HashSet<String> allDays = new HashSet<String>(Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"));
+        alarm.setSchedule(EXAMPLE_ALARM_HOUR, EXAMPLE_ALARM_MINUTE, allDays);
+        alarmDao.insert(alarm);
+
+//        return new Alarm(null, "0 0 8 ? * * *", 1, true, ringtone, true, "", null);
+
     }
 
     @Override

@@ -213,7 +213,11 @@ public class MessageActivity extends AppCompatActivity {
         return spannable;
     }
 
-    public void previewMessage(View view) {
+    /**
+     * Plays the message out loud immediately.
+     * @param view Optional calling view.
+     */
+    public void previewMessage(@Nullable View view) {
         // check tts ready
         if(!mTtsReady){
             Toast.makeText(this, R.string.tts_download_in_prog, Toast.LENGTH_SHORT).show();
@@ -244,7 +248,7 @@ public class MessageActivity extends AppCompatActivity {
 
     /**
      * Save the message into the database and return its raw text to calling activity
-     * @param view
+     * @param view Optional calling view.
      */
     public void saveMessage(@Nullable View view) {
         // process the message and tags
@@ -309,6 +313,10 @@ public class MessageActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Insert a date or day tag.
+     * @param view
+     */
     public void insertTagDate(View view) {
         int cursorPos = editMessage.getSelectionStart();
         DateTagInserterFragment.newInstance(cursorPos,1L).show(getSupportFragmentManager(),"date-tag-inserter");
@@ -320,6 +328,10 @@ public class MessageActivity extends AppCompatActivity {
                 .build());
     }
 
+    /**
+     * Insert a countdown tag.
+     * @param view
+     */
     public void insertTagCountdown(View view) {
         int cursorPos = editMessage.getSelectionStart();
         CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.DOWN)
@@ -332,6 +344,10 @@ public class MessageActivity extends AppCompatActivity {
                 .build());
     }
 
+    /**
+     * Insert a count up tag.
+     * @param view
+     */
     public void insertTagCountup(View view) {
         int cursorPos = editMessage.getSelectionStart();
         CountingTagInserterFragment.newInstance(cursorPos,1L, CountingTagInserterFragment.CountingDirection.UP)

@@ -60,20 +60,16 @@
 
                 />
             <Button
+                style="@style/buttonCustom"
                 android:text="@string/add_alarm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/button_add_alarm"
                 android:onClick="addAlarm"
                 android:layout_gravity="center"
-
+                android:drawableTop="@drawable/ic_action_add"
                 />
         </LinearLayout>
-
-
-
-
-
 
 
     </LinearLayout>

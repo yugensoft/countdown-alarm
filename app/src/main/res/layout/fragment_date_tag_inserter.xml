@@ -29,31 +29,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:tag="EEEE"
+                android:tag="@string/speech_format_day_only"
                 android:id="@+id/rb_5" />
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:tag="dddd 'of' MMMM"
+                android:tag="@string/speech_format_date_of_month"
                 android:id="@+id/rb_1" />
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:tag="MMMM 'the' dddd"
+                android:tag="@string/speech_format_date_the_month"
                 android:id="@+id/rb_2" />
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:tag="dddd 'of' MMMM YYYY"
+                android:tag="@string/speech_format_date_of_month_and_year"
                 android:id="@+id/rb_3" />
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:tag="MMMM 'the' dddd YYYY"
+                android:tag="@string/speech_format_month_the_date_and_year"
                 android:id="@+id/rb_4" />
 
 

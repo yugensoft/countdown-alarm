@@ -3,18 +3,20 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
 
         <item name="android:dialogTheme">@style/CustomDialog</item>
 
         <!--<item name="android:buttonStyle">@style/buttonCustom</item>-->
     </style>
 
-    <!--<style name="buttonCustom" parent="android:Widget.Button">-->
-        <!--<item name="android:background">@color/buttonBackground</item>-->
-    <!--</style>-->
+    <style name="buttonCustom" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/accent</item>
+        <!--<item name="android:padding">5dp</item>-->
+        <item name="android:textColor">@color/white</item>
+    </style>
 
     <style name="FullscreenTheme" parent="AppTheme">
         <item name="windowNoTitle">true</item>
