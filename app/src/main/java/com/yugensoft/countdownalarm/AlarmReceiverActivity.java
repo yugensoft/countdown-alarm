@@ -18,6 +18,11 @@ import android.widget.Toast;
 import org.joda.time.DateTime;
 
 import java.util.Date;
+import java.util.List;
+
+import static com.yugensoft.countdownalarm.AlarmFunctions.getAllAlarmsSorted;
+import static com.yugensoft.countdownalarm.AlarmFunctions.getNextAlarmTimeReadable;
+import static com.yugensoft.countdownalarm.AlarmFunctions.setNotification;
 
 public class AlarmReceiverActivity extends AppCompatActivity {
     private static final String TAG = "alarm-receiver";
@@ -87,6 +92,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         setContentView(R.layout.activity_alarm_receiver);
 
         mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
 
         mTextTime = (TextView)findViewById(R.id.text_time);
 
@@ -108,14 +114,13 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
         // get the next alarm time and set it
         if(!mIsPreview) {
-            mDaoSession = ((CountdownAlarmApplication) getApplication()).getDaoSession();
             Alarm alarm = mDaoSession.getAlarmDao().loadByRowId(mAlarmId);
             Integer repeats = alarm.getRepeats();
             if (repeats == null) {
                 // ongoing repeating alarm, just re-engage it
                 AlarmFunctions.engageAlarm(alarm, this, mDaoSession, mAlarmManager);
 
-            } else if (repeats > 1) { // stub: fixed-repeats alarms not yet implemented
+            } else if (repeats > 1) {
                 // fixed repeats alarm, re-engage it and update it in db
                 repeats--;
                 alarm.setRepeats(repeats);
@@ -146,7 +151,7 @@ public class AlarmReceiverActivity extends AppCompatActivity {
 
     /**
      * Set off a new alarm pendingIntent back to this activity with the snooze delay added
-     * Then dismiss.
+     * Then finish this activity.
      * @param view
      */
     public void snoozeAlarm(@Nullable View view) {
@@ -181,11 +186,43 @@ public class AlarmReceiverActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Stop the alarm and finish this activity.
+     * @param view Optional calling view.
+     */
     public void dismissAlarm(@Nullable View view) {
         mUserDismissed = true;
         stopService(mAlarmPlayerIntent);
         mAlarmPlayerIntent = null;
-        finish();
+
+        // update the system notification of next alarm
+        updateNextAlarmSystemNotification();
+    }
+
+    /**
+     * Update the system notification of next alarm
+     * Then finish.
+     */
+    public void updateNextAlarmSystemNotification(){
+        AlarmFunctions.GetAlarmsCallback callback = new AlarmFunctions.GetAlarmsCallback() {
+            @Override
+            public void callback(final List<Alarm> alarms) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // update notification
+                        String nextAlarmTime = getNextAlarmTimeReadable(alarms, AlarmReceiverActivity.this);
+                        setNotification(nextAlarmTime,AlarmReceiverActivity.this,getString(R.string.app_name));
+
+                        // finish the activity
+                        finish();
+                    }
+                });
+            }
+        };
+
+        getAllAlarmsSorted(mDaoSession,callback);
+
     }
 
     @Override

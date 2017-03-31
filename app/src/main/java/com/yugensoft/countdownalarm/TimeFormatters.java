@@ -15,23 +15,26 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.util.Date;
 
+/**
+ * Functions to convert various time variable formats into a readable hours/minutes string
+ */
 public class TimeFormatters {
 
     /**
-     * Get the next alarm time in a human readable format
-     * @param nextAlarmTime The next alarm time in Date format
+     * Get the alarm set time in a human readable format
+     * @param alarmSetTime The next alarm time in Date format
      * @param addAffixes Add explanatory strings. Make false to get alarm time only.
      * @param context Needed for res strings and toasts.
      * @param showToast True to show toasts.
      */
-    public static void getNextAlarmTime(Date nextAlarmTime, boolean addAffixes, Context context, boolean showToast){
+    public static String getAlarmSetTime(Date alarmSetTime, boolean addAffixes, Context context, boolean showToast){
         StringBuilder sb = new StringBuilder();
         if(addAffixes) {
             sb.append(context.getString(R.string.alarm_set_for));
             sb.append(" ");
         }
 
-        DateTime dateTime = new DateTime(nextAlarmTime);
+        DateTime dateTime = new DateTime(alarmSetTime);
         Period period = new Period(DateTime.now(),dateTime);
         PeriodFormatter formatter = new PeriodFormatterBuilder()
                 .appendDays()
@@ -52,11 +55,10 @@ public class TimeFormatters {
         if(showToast) {
             Toast.makeText(context, output, Toast.LENGTH_LONG).show();
         }
+
+        return output;
     }
 
-    /**
-     * Functions to convert various time variable formats into a readable hours/minutes string
-     */
     public static String convertTimeToReadable(Date date, Context context){
         DateTime dateTime = new DateTime(date);
         return dateTimeToReadableHoursMinutesConverter(dateTime, context);

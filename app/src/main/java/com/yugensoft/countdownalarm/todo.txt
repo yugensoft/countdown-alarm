@@ -21,7 +21,6 @@ make the notification show on BootBroadcast
 make the notifications / notification icon persistent
 keep the alarm sound going during orientation changes
 add more detail to the "next alarm" box
-improve the appearance, make it pretty etc
 async stuff to speed up loading
 add tag clicking
 in-app-bill

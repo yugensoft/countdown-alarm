@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -60,6 +61,14 @@ public class AlarmActivity extends AppCompatActivity implements AlarmPreferenceF
         // Obtain the shared Tracker instance.
         mTracker = ((CountdownAlarmApplication)getApplication()).getDefaultTracker();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(mFragment.getId());
+        fragment.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

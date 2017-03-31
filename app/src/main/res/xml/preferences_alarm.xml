@@ -24,6 +24,9 @@
         android:title="Ringtone"
         android:summary=""
         android:persistent="false"
+        android:ringtoneType="alarm"
+        android:showDefault="true"
+        android:showSilent="true"
         />
     <CheckBoxPreference
         android:key="vibrate"

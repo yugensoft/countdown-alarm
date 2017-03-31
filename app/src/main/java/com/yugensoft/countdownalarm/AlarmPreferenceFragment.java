@@ -10,7 +10,9 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -130,12 +132,12 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         // ringtone
         final ExtRingtonePreference prefRingtone = (ExtRingtonePreference)getPreferenceManager().findPreference("ringtone");
         prefRingtone.setInitialRingtone(mAlarm.getRingtone());
-        prefRingtone.setSummary(getRingtoneTitleFromUri(mAlarm.getRingtone()));
+        setRingtonePreferenceSummary(prefRingtone, mAlarm.getRingtone());
         prefRingtone.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 mAlarm.setRingtone((String)newValue);
-                prefRingtone.setSummary(getRingtoneTitleFromUri(mAlarm.getRingtone()));
+                setRingtonePreferenceSummary(prefRingtone, mAlarm.getRingtone());
                 return true;
             }
         });
@@ -163,6 +165,44 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
             }
         });
 
+    }
+
+    /**
+     * Fills the summary of the ringtone preference with the title of the ringtone, if possible.
+     * If not possible, just say "unknown".
+     * @param prefRingtone The ExtRingtonePreference.
+     * @param ringTone The ringtone URI string.
+     */
+    private void setRingtonePreferenceSummary(ExtRingtonePreference prefRingtone, String ringTone) {
+        // handle "silent" ringtone
+        if(ringTone.equals("")){
+            prefRingtone.setSummary(R.string.silent);
+            return;
+        }
+
+        String ringtoneTitle = getRingtoneTitleFromUri(ringTone);
+        if(ringtoneTitle == null) {
+            prefRingtone.setSummary(R.string.bracket_unknown);
+        } else {
+            prefRingtone.setSummary(ringtoneTitle);
+        }
+
+    }
+
+
+    /**
+     * Get the title of the ringtone from the ringtone uri
+     * @param uri Ringtone uri.
+     * @return The title; null if can't access that uri.
+     */
+    @Nullable
+    private String getRingtoneTitleFromUri(String uri) {
+        Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(uri));
+        if(ringtone != null){
+            return ringtone.getTitle(getActivity());
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -195,6 +235,7 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQ_MESSAGE){
             switch (resultCode){
                 case MessageActivity.RES_CANCELED:
@@ -218,10 +259,6 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
         }
     }
 
-    private String getRingtoneTitleFromUri(String uri) {
-        Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(uri));
-        return ringtone.getTitle(getActivity());
-    }
 
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -289,7 +326,7 @@ public class AlarmPreferenceFragment extends PreferenceFragment {
             mAlarm.update();
         }
 
-        TimeFormatters.getNextAlarmTime(mAlarm.getNextAlarmTime(),true,getActivity(),true);
+        TimeFormatters.getAlarmSetTime(mAlarm.getNextAlarmTime(),true,getActivity(),true);
 
         return mAlarmId;
     }

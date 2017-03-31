@@ -1,6 +1,8 @@
 package com.yugensoft.countdownalarm;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.preference.RingtonePreference;
 import android.util.AttributeSet;
@@ -26,7 +28,7 @@ public class ExtRingtonePreference extends RingtonePreference {
 
     @Override
     protected Uri onRestoreRingtone() {
-        if(mInitialRingtone == null) {
+        if(mInitialRingtone == null || mInitialRingtone.equals("")) {
             return null;
         } else {
             return Uri.parse(mInitialRingtone);
@@ -36,4 +38,5 @@ public class ExtRingtonePreference extends RingtonePreference {
     public void setInitialRingtone(String initialRingtone) {
         this.mInitialRingtone = initialRingtone;
     }
+
 }

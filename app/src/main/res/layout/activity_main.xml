@@ -39,6 +39,7 @@
             android:id="@+id/button_add_alarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             style="@style/buttonCustom"
             android:orientation="horizontal"
             android:clickable="true"
