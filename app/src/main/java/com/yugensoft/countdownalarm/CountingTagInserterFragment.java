@@ -21,9 +21,6 @@ import org.joda.time.format.DateTimeFormat;
 
 import java.util.Calendar;
 
-/**
- * Created by yugensoft on 4/11/2016.
- */
 public class CountingTagInserterFragment extends TagInserterFragment {
 
     public enum CountingDirection {

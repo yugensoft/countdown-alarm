@@ -14,9 +14,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.analytics.HitBuilders;
 
-/**
- * Created by yugensoft on 4/11/2016.
- */
 public class DateTagInserterFragment extends TagInserterFragment {
     private Button mCancelButton;
     private Button mInsertButton;

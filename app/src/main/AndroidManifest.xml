@@ -25,7 +25,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MessageActivity" />
+        <activity android:name=".MessageActivity"
+            android:label="@string/message_activity_title"
+            />
         <activity
             android:name=".AlarmActivity"
             android:label="@string/alarm_activity_title" />

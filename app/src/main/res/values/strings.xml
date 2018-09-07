@@ -88,5 +88,6 @@
     <string name="example_alarm">Good morning! Today is {%1$d}.</string>
     <string name="bracket_unknown">(unknown)</string>
     <string name="silent">Silent</string>
+    <string name="message_activity_title">Set message</string>
 
 </resources>
